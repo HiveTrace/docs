@@ -6,9 +6,11 @@ sidebar:
 
 On the **Alert Configuration** page, you can review existing notification channels and add new ones. Currently, two delivery methods are supported: **Email** and **Telegram**.
 
-![Page "Alert Configuration"](../../../../../assets/img/alert_config_page.webp)
+![Alert channel and language configuration form](../../../../../assets/img/alert-config-create-4-3.webp)
 
 All configured notifications are also available in the **Alerts** section, providing centralized visibility into system events and incidents.
+
+Choose Russian or English for each notification channel. The selected language applies to new messages sent through that channel.
 
 > **Important:** SIEM integration is configured during platform deployment by your DevOps engineer or a HiveTrace specialist. The supported log forwarding format is **Syslog**.
 

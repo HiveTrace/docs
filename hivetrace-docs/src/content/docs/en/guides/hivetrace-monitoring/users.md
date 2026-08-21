@@ -4,33 +4,54 @@ sidebar:
   order: 8
 ---
 
-The **Users** page lists all end users of your AI application (for example, chatbot users) who interact with the model by sending messages. This section provides centralized user management and visibility into user activity.
+The **Users** section lists the end users of the selected AI application and provides access to their related sessions and files.
 
-![Page "Users"](../../../../../assets/img/users_page.webp)
+To open it, go to **Applications**, click the ID of the required application, and select the **Users** tab.
 
-From this page, you can:
+![Users of the selected application](../../../../../assets/img/users-application-table-4-3.webp)
 
-- view the list of users;
-- edit or delete existing users;
-- add users manually.
+The application name and description are shown at the top. The **Users**, **Policies**, **Dataclean**, and **Alert configurations** tabs are displayed below the application details.
 
-Users can also be added **automatically**. When sending requests to HiveTrace, if you specify a new user identifier:
+## Users table
 
-- in **additional parameters** when using the API or SDK, or
-- in **HTTP headers** when using a proxy,
+The table contains:
 
-the user will be created automatically and appear in the list. In this case, the record will contain only the **user ID** — user names can be added manually via the interface if needed.
+- **Client ID** — the unique user identifier. A blue ID links to the user details page;
+- **Full name** — the user’s display name, if it was supplied or added manually.
 
-## User Details
+Available actions:
 
-Clicking on a user ID opens a detailed view of their activity. The **“Sessions” tab is displayed by default**, located next to the **“Files”** tab.
+1. Click **Add new user** to create a user manually.
+2. Open **Column settings** to select the visible columns.
+3. Use the **⋮** menu in a user row for the available record actions, including editing and deletion.
+4. At the bottom of the table, change the number of rows per page or move between pages.
+5. Click a blue **Client ID** to open the user details page.
 
-![Users Sessions](../../../../../assets/img/users_sessions.webp)
+## Automatic user creation
 
-The **Sessions** tab provides a history of the user’s interactions with the application, enabling analysis of individual conversations.
+A user is created automatically when a new identifier is supplied to HiveTrace:
 
-Switching to the **Files** tab displays all files uploaded by the user during chatbot interactions.
+- in additional parameters when using the API or SDK;
+- in HTTP headers when using a proxy.
 
-![Users Files](../../../../../assets/img/users_files.webp)
+An automatically created record may contain only the **Client ID**. Add the full name through the interface if needed.
 
-> **Important:** uploaded file contents are **not automatically scanned, censored, or analyzed**. Files are available only for manual review and download and are not processed by security or monitoring policies.
+## User details and sessions
+
+Clicking a **Client ID** opens the user details page. The user name and client ID appear at the top, followed by the **Sessions** and **Files** tabs.
+
+![User details and sessions](../../../../../assets/img/user-details-sessions-4-3.webp)
+
+The **Sessions** tab shows the records associated with the user. The table contains the record and session IDs, user, application, message, and any other enabled columns.
+
+- Click a blue **record ID** to open the event details.
+- Use **Column settings** to change the table layout.
+- Select **Files** to view the user’s uploaded attachments.
+
+## User files
+
+The **Files** tab lists files associated with the user’s requests. For supported formats, you can open a preview or download the original file.
+
+![User files](../../../../../assets/img/users_files.webp)
+
+> **Important:** file content processing depends on the global **Custom file processing** setting and the selected application configuration. If processing is disabled, a file appearing on this tab does not by itself mean that its contents were checked by policies or Dataclean.

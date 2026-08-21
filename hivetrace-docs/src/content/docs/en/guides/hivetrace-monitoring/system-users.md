@@ -1,53 +1,54 @@
 ---
-title: "System Users"
+title: "System users"
 sidebar:
-  order: 12
+  order: 15
 ---
 
-The **System Users** page is used to manage accounts that have access to the HiveTrace administrative interface. These users are typically team members responsible for monitoring, configuration, and platform integration.
+Use **System users** to manage employee accounts that can sign in to the HiveTrace administration console. Open it from the user-with-plus icon in the left navigation.
 
-From this page, you can:
+![System users page overview](../../../../../assets/img/system-users-table-4-3.webp)
 
-- view the list of system users;
-- create new accounts;
-- delete users;
-- deactivate accounts without fully removing access.
+## User table
 
-![Page "System users"](../../../../../assets/img/system_users_page.webp)
+Each row represents one account. The table contains the following information:
 
-## System Users Table
+| Column | Description |
+| --- | --- |
+| **Email** | Address the user enters when signing in |
+| **Username** | Display name for the account |
+| **Role** | Set of available capabilities, such as **Administrator** or **Developer** |
+| **Active** | Current account state |
+| **Last login** | Date and time of the last successful sign-in; blank when the account has never signed in |
 
-The page displays a table with the following columns:
+Click **Column settings** to show or hide available table fields. The **⋮** menu at the end of a row opens actions for that account; the available actions depend on the current administrator's permissions and the account state.
 
-| Field      | Description                     |
-| ---------- | ------------------------------- |
-| Email      | User’s email address            |
-| Username   | Display name of the user        |
-| Role       | Assigned system role            |
-| Active     | Account status                  |
-| Last Login | Date and time of the last login |
+Use the controls below the table to change the number of rows per page or move to the previous or next page. An unavailable navigation control is shown disabled.
 
-## Adding a System User
+## Add a user
 
-To add a new system user, click **“Add New User.”**
-In the modal window, fill in the following fields:
+1. Click **Add new user**.
+2. Complete all required fields.
+3. Verify the selected role and password.
+4. Click **Add**.
 
-- **Username**
-- **Email**
-- **Role**
-- **Password**
+![Add system user form](../../../../../assets/img/system-user-create-4-3.webp)
 
-Once saved, the user will be granted access according to the assigned role.
+The form contains:
 
-## User Roles
+| Field | Purpose |
+| --- | --- |
+| **Username** | Name displayed in the interface |
+| **Email** | Unique address used to sign in |
+| **Role** | Determines available sections and operations |
+| **Password** | Initial password for the new account |
 
-HiveTrace supports two system roles:
+All fields are marked with an asterisk and are required. Open **Role** with the arrow and select the appropriate option. The eye icon in **Password** reveals or hides the entered value. Click **×** to close the form without creating an account.
 
-- **Administrator** — has full access to all system capabilities. Administrators can manage applications, policies, alerts, view user sessions and analytics, and create, delete, or manage system users.
+After the user is added successfully, the account appears in the table. Share the password through a protected channel and grant only the permissions needed for the person's responsibilities.
 
-- **Developer** — intended for application integration with HiveTrace. Users with this role can:
-  - view alerts;
-  - create applications;
-  - generate API tokens for integration.
+## Roles
 
-  Developers **do not have access to session data** (they cannot see user messages or model responses) and **cannot manage system users**. This role follows the principle of least privilege and provides only the permissions required for integration and operation.
+- **Administrator** is intended for HiveTrace management and configuration, including administrative areas.
+- **Developer** is intended for technical users who integrate and maintain applications.
+
+The exact set of available operations can depend on deployment configuration. If a user cannot see a required area, first check the assigned role and account status.

@@ -1,83 +1,103 @@
 ---
-title: "Censorship Policies"
+title: "Policies"
+description: "Configure HiveTrace Guardrail, token thresholds, custom policies, and blacklists."
 sidebar:
   order: 4
 ---
 
-## Policy Management
+Policies are configured separately for each application. They let you enable the built-in HiveTrace protection, define threat thresholds, create custom rules for user requests, and check messages or files against blacklists.
 
-The Policies section allows you to configure security rules applied to user inputs and model outputs. Here you can manage built-in Guardrail protections, create Custom policies based on your own prompts, and control token usage thresholds.
+## Open policy settings
 
-> For details on configuring token limits, refer to the [Token Thresholds](./token-thresholds)
+1. Select **Applications** in the sidebar.
+2. Open an application by clicking its ID.
+3. Select the **Policies** tab.
 
-![Page "Policies"](../../../../../assets/img/policy_page.webp)
+The page contains HiveTrace Guardrail settings, token thresholds, custom policies, and message and file blacklists.
 
-### HiveTrace Guardrail
+![Application policy page overview](../../../../../assets/img/policies-overview-4-3.webp)
 
-HiveTrace Guardrail is a built-in set of protective mechanisms delivered and maintained by the HiveTrace team. Guardrail policies have a fixed configuration and cannot be modified, ensuring a consistent and validated level of security.
+## HiveTrace Guardrail
 
-Within this section, you can enable or disable Guardrail independently for:
+HiveTrace Guardrail provides built-in protection against unsafe requests. Enable checks independently for each direction:
 
-- incoming user messages (input);
-- model responses (output).
+- **Input** checks messages sent from the user to the model.
+- **Output** checks model responses before they are returned to the user.
 
-Guardrail protects against a broad range of threats, including prompt injections, jailbreak attempts, and other efforts to manipulate model behavior. It also helps detect and block clearly harmful or unsafe content originating from either the user or the model.
+Select **Save** to apply changes. **Reset** discards unsaved changes and restores the last saved values.
 
-### Setting up a Custom policy in HiveTrace
+## Token thresholds
 
-This section explains how to configure a Custom policy for topical validation of requests and responses. The policy helps your bot stay within a defined domain and block off-topic content.
+Token thresholds map a check result to a threat level. Set all three required values:
 
-#### 1) What a Custom policy does
+- **Low** is the first trigger boundary.
+- **High** is the elevated-risk boundary.
+- **Critical** is the critical-risk boundary.
 
-- The policy checks whether the text matches an **allowlist of topics**. If the topic is not recognized as allowed, it blocks the message using a **deny by default** approach.
-- When triggered, the policy marks the event with `custom_flagged=true`.
-- You can enable the policy:
-  - on **input** (validate the user request before calling the main model)
-- The policy evaluates **topical relevance**. It does not replace fact-checking or completeness checks.
+Values must be ascending: Low must be less than High, and High must be less than Critical. Select **Save** to apply the values or **Reset** to discard unsaved changes.
 
-#### 2) How to write a policy prompt
+![Token threshold settings](../../../../../assets/img/policies-token-thresholds-4-3.webp)
 
-A prompt is a compact description of the allowed domain. A short list of **semantic topics** works better than a list of individual questions.
+## Custom policies
 
-- Write **topics**, not questions: eras, people, wars, terms, chronology, reading lists, learning tasks.
-- Keep it short: typically **7–15** items are enough.
-- Use the same language and phrasing as your users. For chatbots, you can add 1–2 short dialogue-style lines.
-- After setup, run real test cases and refine the wording if you see false positives/negatives.
+A custom policy validates user requests using an instruction prompt. The **Model rules** table displays the name and prompt of every policy.
 
-Example prompt for the “History” domain:
+![Custom policy table](../../../../../assets/img/policies-custom-list-4-3.webp)
 
-- Historical dates, years, centuries, and converting date formats (BCE/CE).
-- Chronology and sequencing of historical events.
-- Causes, course, and outcomes of wars, treaties, and changes of power.
-- Historical figures, states, alliances, and key terms.
-- Short “what happened in year X” explanations and definitions in historical context.
+Available actions:
 
-#### 3) Step-by-step setup in the HiveTrace UI
+- **Add new policy** opens the policy form.
+- A row checkbox selects a policy; the header checkbox selects all visible rows.
+- **Delete selected** removes the selected policies and is enabled after at least one row is selected.
+- **Column settings** controls which table columns are visible.
+- The row **⋮** menu edits or deletes one policy.
+- **Rows per page**, **Previous**, and **Next** control pagination.
 
-1. Open the target application in HiveTrace.
-2. Go to the “Policies” tab.
-3. Create or edit a policy and select a **Custom** policy.
-4. Fill in the “Name” field (e.g., “History”).
-5. Paste your allowlisted topics into the “Prompt” field (see section 2).
-6. Enable **Input** if you want to record irrelevant requests before they reach the model.
-7. Click “Save”.
+### Create, edit, and test a policy
 
-On the right side, there’s a testing panel where you can submit sample messages and immediately see the validation result.
+Select **Add new policy**, or choose Edit from a row's **⋮** menu. Complete these fields:
 
-![Custom policy editor and test messages](../../../../../assets/img/check_custom_policy.webp)
+1. **Name** — a clear, unique rule name.
+2. **Prompt** — the instruction used to validate user requests.
+3. **Input** — enables the policy for incoming messages.
 
-#### 4) Testing and debugging
+Use the test panel on the right to enter a sample request and send it:
 
-- Prepare test cases: clearly relevant, clearly irrelevant, and borderline.
-- Verify that relevant messages pass and irrelevant ones are blocked.
-- If relevant content is blocked, expand or rephrase the topic list to cover the required wording and contexts.
-- If irrelevant content passes, make topics more specific: remove overly broad terms and add clearer domain signals.
-- Test directions separately: if only **Output** is enabled, an irrelevant request may pass on input, but the response can still be blocked.
+- a red message with a warning icon means the policy detected a violation;
+- a green message with a shield means the request passed validation.
 
-#### 5) What happens when it triggers
+Test both prohibited and acceptable wording. Select **Save** when finished; **Cancel** closes the form without saving.
 
-When triggered, the policy sets `custom_flagged=true`.
+![Editing and testing a custom policy](../../../../../assets/img/policies-custom-edit-test-4-3.webp)
 
-#### 6) Summary
+## Message blacklist
 
-A Custom policy is a relevance classifier: it checks whether a message belongs to the allowlisted topics defined in the policy. If it doesn’t, the message is treated as irrelevant and can be blocked or flagged for monitoring.
+Patterns in this section are applied to message text. Each card contains the pattern name, an **Enable** switch, an information button, and a **⋮** menu for editing or deletion.
+
+Select **Add pattern** to create a rule. A disabled pattern remains saved but is not used during checks.
+
+![Message blacklist](../../../../../assets/img/policies-message-blacklist-4-3.webp)
+
+## File blacklist
+
+The **Files → Blacklist** section works in the same way, but applies its patterns to the contents of files attached to a request. Individual rules can be enabled or disabled, inspected, edited, or deleted.
+
+![File blacklist](../../../../../assets/img/policies-file-blacklist-4-3.webp)
+
+## Add a pattern
+
+Select **Add pattern** in the appropriate section and complete the form:
+
+1. **Name** — the label displayed in the list.
+2. **Pattern** — a regular expression or another supported pattern expression.
+3. **Direction** — **Input** for user requests or **Output** for model responses.
+4. **Enable** — activates the rule immediately after creation.
+5. **Save** — creates the pattern. The **×** button closes the form without saving.
+
+Test the expression on representative data before enabling it. An overly broad pattern can cause false positives.
+
+![Add new pattern form](../../../../../assets/img/policies-add-pattern-4-3.webp)
+
+## Verify the result
+
+After saving the settings, send a test request through the connected application. To inspect triggers, open the record in **Session Analytics**, then use the **Censors**, **Data cleaning**, or **Validation configuration** tabs. With a synchronous protected integration, a detected violation can also block the request.

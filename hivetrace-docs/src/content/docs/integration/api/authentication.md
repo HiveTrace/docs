@@ -16,3 +16,5 @@ Authorization: Bearer <API_TOKEN>
 | Токен неверный    | **401 Unauthorized** |
 
 API-токены создаются и управляются через HiveTrace Web UI.
+
+В HiveTrace 4.3 API-токен привязан к приложению. `application_id` в запросе должен соответствовать приложению, выбранному при создании токена.

@@ -6,7 +6,7 @@ sidebar:
 
 The **Token Thresholds** configuration is available within the **Policies** section and is used to control the size of individual requests and model responses. Thresholds help detect and limit abnormal or resource-intensive interactions at the level of a single request.
 
-![Page "Policies"](../../../../../assets/img/policy_page.webp)
+![HiveTrace 4.3 policies page](../../../../../assets/img/policies-4-3.webp)
 
 Thresholds can be configured separately for:
 

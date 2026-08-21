@@ -1,68 +1,74 @@
 ---
-title: "Personal Data Cleaning"
+title: Data cleaning
+description: Configure detection, pseudonymization, and masking of sensitive data in messages and files.
 sidebar:
-  order: 5
+  order: 6.5
 ---
 
-The **Personal Data Cleaning** section is used to configure rules for detecting and processing personal and sensitive data in user inputs and model outputs. This module helps reduce data leakage risks, ensure compliance with internal policies and regulations, and improve the overall security posture of AI applications.
+The **Data cleaning** section configures sensitive-data processing for each application. Saved settings apply to new messages and files.
 
-## Built-in Patterns
+Open **Applications**, select the application ID, and choose **Data cleaning**.
 
-HiveTrace includes a set of predefined patterns covering common types of personal data. These rules are enabled by default and require no additional configuration.
+![Application data-cleaning settings](/docs/images/hivetrace-monitoring/dataclean/dataclean-settings-overview-4-3.png)
 
-![Base Patterns](../../../../../assets/img/base_dataclean_patterns.webp)
+## Built-in patterns
 
-### Personal Data Categories
+The 16 built-in patterns are Address, Bank card, Card code, Domain name, Email, Tax ID, IP address, Tax registration reason code, Names, Primary State Registration Number, Individual Entrepreneur Registration Number, Passport, Phone, Individual Insurance Account Number, Access token, and Link.
 
-| Category        | Description                                 |
-| --------------- | ------------------------------------------- |
-| Address         | Mailing and physical addresses              |
-| Bank Card       | Bank card numbers                           |
-| Card Code       | CVV / CVC and other security codes          |
-| Organization    | Company and organization names              |
-| Job Title       | Professional titles and roles               |
-| Names           | First and last names                        |
-| Passport        | Passport details and document identifiers   |
-| Phone           | Mobile and landline phone numbers           |
-| Email           | Email addresses                             |
-| IP Address      | IPv4 and IPv6 addresses                     |
-| Domain Name     | Domain names and hosts                      |
-| INN             | Taxpayer Identification Number              |
-| KPP             | Tax Registration Reason Code                |
-| OGRN            | Primary State Registration Number           |
-| OGRNIP          | Individual Entrepreneur Registration Number |
-| SNILS           | Personal insurance account number           |
-| Monetary Amount | Financial amounts                           |
-| Date            | Calendar dates                              |
-| Period          | Time ranges and intervals                   |
-| Deadline        | Due dates                                   |
-| Diagnosis       | Medical diagnoses                           |
-| Access Token    | API keys and access tokens                  |
-| Link            | URLs and web links                          |
+Each card has two switches: **Input** checks user requests and **Output** checks model responses. The information icon opens the pattern description.
 
-## Custom Patterns
+![Built-in patterns and direction switches](/docs/images/hivetrace-monitoring/dataclean/dataclean-basic-patterns-4-3.png)
 
-You can define custom detection patterns using regular expressions. Scroll down and click **“Add Pattern”**, then provide a name, description, regex pattern, and select the scope — **input**, **output**, or both.
+## Custom and allowed patterns
 
-![Custom Patterns](../../../../../assets/img/custom_dataclean_patterns.webp)
+**Custom patterns** add team-specific regular expressions. Use **Add pattern**, then enable Input and/or Output. The three-dot menu provides edit and delete actions.
 
-## Data Processing Types
+**Allowed patterns** define exceptions for values that resemble sensitive data but are valid in your workflow.
 
-For detected personal data, the following processing modes are available
+![Custom and allowed patterns](/docs/images/hivetrace-monitoring/dataclean/dataclean-custom-allowed-patterns-4-3.png)
 
-![Processing Modes](../../../../../assets/img/dataclean_masking_types.webp)
+![Pattern cards and add controls](/docs/images/hivetrace-monitoring/dataclean/dataclean-pattern-groups-4-3.png)
 
-| Processing Type | Description                                                                 |
-| --------------- | --------------------------------------------------------------------------- |
-| Masking         | Replaces detected data with an anonymized placeholder (for example, `XXXX`) |
-| Detection       | Flags the presence of personal data without modifying the content           |
-| Removal         | Completely removes detected data from the message                           |
+## Processing mode
 
-Processing rules can be configured independently for **input** and **output**.
+Input and output can use different modes:
 
-## Data Cleaning Validation
+- **Masking** replaces the detected value with `X` characters.
+- **Pseudonymization** replaces it with a stable label such as `NAME_1` or `EMAIL_1`.
 
-At the bottom of the page, a validation tool allows you to test how the data cleaning module processes messages containing personal data (or not) for both input and output based on the configured settings. This helps verify correctness before deploying the configuration to production.
+## File processing
 
-![Dataclean Testing 1](../../../../../assets/img/dataclean_test_1.webp)
-![Dataclean Testing 2](../../../../../assets/img/dataclean_test_2.webp)
+**Incoming files** and **Outgoing files** control text extraction and inspection for user attachments and model-produced files. **Detection only** means entities are reported without modifying the file.
+
+![Processing mode and file processing](/docs/images/hivetrace-monitoring/dataclean/dataclean-file-processing-4-3.png)
+
+## Inspection depth and source storage
+
+Message and file inspection depth controls how much context is analyzed. Deeper inspection can improve contextual detection but costs more time and resources.
+
+Source-storage switches retain both original and cleaned messages for comparison in analytics. Enable them only when permitted by your access and retention policies.
+
+![Inspection depth and source-message storage](/docs/images/hivetrace-monitoring/dataclean/dataclean-depth-storage-4-3.png)
+
+## Test data cleaning
+
+1. Enter a sample in **Source text**.
+2. Click **Clean**.
+3. Compare **Cleaned text (Input)** and **Cleaned text (Output)**.
+4. Verify pseudonymized labels and masked values.
+5. Review **Detected sensitive data** using the Incoming and Outgoing tabs.
+
+![Text-cleaning test](/docs/images/hivetrace-monitoring/dataclean/dataclean-text-test-4-3.png)
+
+The result table shows the entity type, source text, and cleaned text. Use **Column settings** to select visible columns.
+
+![Detected sensitive-data table](/docs/images/hivetrace-monitoring/dataclean/dataclean-detected-data-4-3.png)
+
+## Recommended setup order
+
+1. Enable the required built-in patterns and directions.
+2. Add custom patterns and exceptions.
+3. Select message-processing modes.
+4. Configure files, inspection depth, and source storage.
+5. Test the configuration.
+6. Send a test request and verify it in **Session analytics**.
