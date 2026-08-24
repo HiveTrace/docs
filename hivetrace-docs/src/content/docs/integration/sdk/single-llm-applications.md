@@ -13,10 +13,6 @@ HiveTrace подключается перед моделью и решает д�
 - **Контроль входа (`input`)**: что пользователь отправляет в LLM
 - **Контроль выхода (`output`)**: что LLM возвращает пользователю
 
-:::info
-Если вы используете агентные фреймворки (LangChain/CrewAI/OpenAI Agents), смотрите отдельные страницы интеграций в разделе SDK.
-:::
-
 ---
 
 ## Предварительные требования
@@ -83,9 +79,9 @@ from hivetrace import SyncHivetraceSDK
 
 APP_ID = "your-application-id"
 
-def is_flagged(result: dict) -> bool:
-    mr = (result or {}).get("monitoring_result") or {}
-    return bool(mr.get("guardrail_flagged") or mr.get("custom_flagged"))
+def as_dict(result) -> dict:
+    """SDK возвращает Pydantic-модель; преобразуем её для бизнес-логики."""
+    return result.model_dump() if hasattr(result, "model_dump") else dict(result)
 
 def call_your_llm(prompt: str) -> str:
     # TODO: your LLM call (OpenAI, local model, etc.)
@@ -108,14 +104,16 @@ input_result = client.input(
     },
 )
 
-if is_flagged(input_result):
-    # Do not call your LLM
-    safe_reply = "Извините, я не могу помочь с этим запросом."
-    client.output(application_id=APP_ID, message=safe_reply)
-    raise SystemExit(safe_reply)
+input_data = as_dict(input_result)
+if input_data.get("errors"):
+    raise RuntimeError(input_data["errors"])
+
+# Структура guardrails/custom_policy зависит от schema_version API.
+# Примените здесь правила блокировки вашего приложения.
+prompt_for_llm = (input_data.get("dataclean") or {}).get("cleaned_text") or user_message
 
 # 2) Call your LLM
-assistant_message = call_your_llm(user_message)
+assistant_message = call_your_llm(prompt_for_llm)
 
 # 3) Output (LLM response)
 output_result = client.output(
@@ -128,15 +126,13 @@ output_result = client.output(
     },
 )
 
-if is_flagged(output_result):
-    safe_reply = "Извините, я не могу предоставить такой ответ."
-    client.output(application_id=APP_ID, message=safe_reply)
-    raise SystemExit(safe_reply)
-```
+output_data = as_dict(output_result)
+if output_data.get("errors"):
+    raise RuntimeError(output_data["errors"])
 
-:::tip
-Если вам нужно **только решение “разрешить/запретить”** без сохранения текста на стороне HiveTrace, используйте `additional_parameters={"censor_only": true}`.
-:::
+# Перед возвратом ответа примените решение на основе
+# output_data["guardrails"] и output_data["custom_policy"].
+```
 
 ---
 
@@ -200,7 +196,7 @@ client.input(
 
 ---
 
-## Файлы (`files`) — только для `input`
+## Файлы (`files`)
 
 Прикрепления нужны, когда пользователь отправляет документы/контекст, который важен для анализа. Формат — список кортежей:
 
@@ -221,12 +217,12 @@ client.input(
 ```
 
 :::note
-На текущий момент **файлы поддерживаются для `input()`**. Для `output()` отправляйте только текст ответа модели.
+Параметр `files` поддерживается в `input()` и `output()`. Входящие файлы прикрепляются к анализу запроса пользователя, исходящие — к анализу ответа модели.
 :::
 
 ---
 
-## API: `input()` и `output()`
+## API: `input()`, `output()` и `function_call()`
 
 ### `input()`
 
@@ -235,7 +231,7 @@ client.input(
 - `application_id` — UUID приложения из UI
 - `message` — текст запроса
 - `additional_parameters` — опциональные метаданные
-- `files` — опциональные файлы (только `input`)
+- `files` — опциональные файлы
 
 ### `output()`
 
@@ -244,6 +240,10 @@ client.input(
 - `application_id` — UUID приложения из UI
 - `message` — текст ответа LLM
 - `additional_parameters` — опциональные метаданные
+
+### `function_call()`
+
+Отправляет вызов инструмента в HiveTrace. Обязательны `application_id`, `tool_call_id`, `func_name` и `func_args` (JSON-строка). Параметры `func_result` и `additional_parameters` опциональны.
 
 :::info
 Как правило, в `output()` отправляют **тот текст, который реально показывается пользователю** (после всех пост‑обработок/фильтров).

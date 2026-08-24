@@ -13,10 +13,6 @@ HiveTrace sits at the model boundary and gives you two control points:
 - **`input`**: what the user is sending to the model
 - **`output`**: what the model is returning to the user
 
-:::info
-If you use agent frameworks (LangChain/CrewAI/OpenAI Agents), use the dedicated integrations in the SDK section.
-:::
-
 ---
 
 ## Prerequisites
@@ -83,9 +79,9 @@ from hivetrace import SyncHivetraceSDK
 
 APP_ID = "your-application-id"
 
-def is_flagged(result: dict) -> bool:
-    mr = (result or {}).get("monitoring_result") or {}
-    return bool(mr.get("guardrail_flagged") or mr.get("custom_flagged"))
+def as_dict(result) -> dict:
+    """The SDK returns a Pydantic model; convert it for application logic."""
+    return result.model_dump() if hasattr(result, "model_dump") else dict(result)
 
 def call_your_llm(prompt: str) -> str:
     # TODO: your LLM call (OpenAI, local model, etc.)
@@ -108,13 +104,16 @@ input_result = client.input(
     },
 )
 
-if is_flagged(input_result):
-    safe_reply = "Sorry — I can’t help with that request."
-    client.output(application_id=APP_ID, message=safe_reply)
-    raise SystemExit(safe_reply)
+input_data = as_dict(input_result)
+if input_data.get("errors"):
+    raise RuntimeError(input_data["errors"])
+
+# The guardrails/custom_policy shape depends on the API schema_version.
+# Apply your application's blocking rules here.
+prompt_for_llm = (input_data.get("dataclean") or {}).get("cleaned_text") or user_message
 
 # 2) Call your LLM
-assistant_message = call_your_llm(user_message)
+assistant_message = call_your_llm(prompt_for_llm)
 
 # 3) Output (LLM response)
 output_result = client.output(
@@ -127,15 +126,13 @@ output_result = client.output(
     },
 )
 
-if is_flagged(output_result):
-    safe_reply = "Sorry — I can’t provide that answer."
-    client.output(application_id=APP_ID, message=safe_reply)
-    raise SystemExit(safe_reply)
-```
+output_data = as_dict(output_result)
+if output_data.get("errors"):
+    raise RuntimeError(output_data["errors"])
 
-:::tip
-If you only need an allow/deny decision and don’t want HiveTrace to store message text, use `additional_parameters={"censor_only": true}`.
-:::
+# Before returning the response, apply your decision based on
+# output_data["guardrails"] and output_data["custom_policy"].
+```
 
 ---
 
@@ -199,7 +196,7 @@ client.input(
 
 ---
 
-## Files (`files`) — `input` only
+## Files (`files`)
 
 Use attachments when users provide documents/context you want HiveTrace to analyze. Format:
 
@@ -220,12 +217,12 @@ client.input(
 ```
 
 :::note
-At the moment, files are supported for **`input()`**. For `output()`, send only the model response text.
+The `files` parameter is supported by both `input()` and `output()`. Input files are attached to user-prompt analysis; output files are attached to model-response analysis.
 :::
 
 ---
 
-## API: `input()` and `output()`
+## API: `input()`, `output()`, and `function_call()`
 
 ### `input()`
 
@@ -234,7 +231,7 @@ Sends a **user prompt** to HiveTrace.
 - `application_id` — application UUID from the UI
 - `message` — prompt text
 - `additional_parameters` — optional metadata
-- `files` — optional attachments (input only)
+- `files` — optional attachments
 
 ### `output()`
 
@@ -243,6 +240,10 @@ Sends an **LLM response** to HiveTrace.
 - `application_id` — application UUID from the UI
 - `message` — LLM response text
 - `additional_parameters` — optional metadata
+
+### `function_call()`
+
+Sends a tool call to HiveTrace. `application_id`, `tool_call_id`, `func_name`, and `func_args` (a JSON string) are required. `func_result` and `additional_parameters` are optional.
 
 :::info
 Typically you should send in `output()` the **exact text that the user sees** (after post-processing/filtering).

@@ -73,15 +73,6 @@ export default defineConfig({
 									},
 									link: "integration/sdk/single-llm-applications",
 								},
-								{
-									label: "Мультиагенты",
-									translations: {
-										en: "Multi-Agents",
-									},
-									autogenerate: {
-										directory: "integration/sdk/agents",
-									},
-								},
 							],
 						},
 						{

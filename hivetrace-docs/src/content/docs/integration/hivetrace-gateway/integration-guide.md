@@ -4,7 +4,7 @@ sidebar:
   order: 1
 ---
 
-**Версия документа:** для gateway 4.1.0
+**Версия документа:** для gateway 4.2.0
 
 **Аудитория:** инженерные и платформенные команды, интегрирующие HiveTrace Gateway в производственную среду.
 
@@ -14,9 +14,10 @@ sidebar:
 
 ## 1. Назначение и место в архитектуре
 
-HiveTrace Gateway представляет собой OpenAI-совместимый HTTP-прокси, который размещается между клиентским приложением и LLM-провайдером (OpenAI, Anthropic OpenAI-compat, LiteLLM, vLLM, Ollama в OpenAI-режиме и др.). Для каждого запроса выполняется следующая последовательность:
+HiveTrace Gateway представляет собой HTTP-прокси, который размещается между клиентским приложением и LLM-провайдером (OpenAI, Anthropic, LiteLLM, vLLM, Ollama и др.). Поддерживаются два формата с полным пайплайном HiveTrace: **OpenAI Chat Completions** (`/v1/chat/completions`) и **Anthropic Messages** (`/v1/messages`). Для каждого запроса выполняется следующая последовательность:
 
-1. Принимается gateway как обычный OpenAI-вызов.
+
+1. Gateway принимает обычный вызов OpenAI или Anthropic SDK.
 2. Регистрируется в HiveTrace до отправки в LLM.
 3. Проксируется в апстрим.
 4. Регистрируется в HiveTrace после получения ответа.
@@ -49,22 +50,32 @@ API соответствует OpenAI Chat Completions, Embeddings и Models: ф
 
 Контракт API доступен в формате OpenAPI 3.1:
 
-- Снапшот: [`openapi.json`](./openapi.json).
 - На запущенном экземпляре gateway: `GET /openapi.json`, Swagger UI на `/docs`, ReDoc на `/redoc`.
+
+### 1.3. Поддержка Anthropic API
+
+Помимо OpenAI gateway поддерживает нативный формат Anthropic:
+
+- `POST /v1/messages` — Anthropic Messages API с **полным** пайплайном HiveTrace (pre-call + post-call + блокировки), форма запроса и ответа идентичны Anthropic. Запрос форвардится в Anthropic-passthrough апстрима (LiteLLM `/anthropic/v1/messages` → `api.anthropic.com`); заголовки `anthropic-version` / `anthropic-beta` / `x-api-key` пробрасываются без изменений.
+- `POST|GET|DELETE /v1/files` — Anthropic Files API, прозрачное проксирование (см. раздел 5.6).
+
+Оба формата проходят через единый пайплайн HiveTrace; различается только разбор тела запроса/ответа. Извлечение идентификаторов (`X-Application-Id`/`X-User-Id`/`X-Session-Id`), модель ошибок и режимы доставки телеметрии — общие.
 
 ---
 
 ## 2. Эндпоинты
 
-Gateway предоставляет единую точку входа (по умолчанию `:4100`) и реализует три OpenAI-совместимых эндпоинта:
+Gateway предоставляет единую точку входа (по умолчанию `:4100`) и реализует следующие эндпоинты:
 
-| Метод  | Путь                   | Назначение                                                                          | Пайплайн HiveTrace                                     |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `POST` | `/v1/chat/completions` | Chat completion. Для асинхронного режима мониторинга поддерживается `stream: true`. | **Полный** (pre-call + post-call + логирование ошибок) |
-| `POST` | `/v1/embeddings`       | Embeddings.                                                                         | **Не применяется** — прозрачное проксирование          |
-| `GET`  | `/v1/models`           | Список моделей апстрима.                                                            | **Не применяется** — прозрачное проксирование          |
+| Метод | Путь | Назначение | Пайплайн HiveTrace |
+|---|---|---|---|
+| `POST` | `/v1/chat/completions` | OpenAI chat completion. Для асинхронного режима мониторинга поддерживается `stream: true`. | **Полный** (pre-call + post-call + логирование ошибок) |
+| `POST` | `/v1/messages` | Anthropic messages. Для асинхронного режима поддерживается `stream: true`. | **Полный** (pre-call + post-call + логирование ошибок) |
+| `POST` | `/v1/embeddings` | Embeddings. | **Не применяется** — прозрачное проксирование |
+| `GET`  | `/v1/models` | Список моделей апстрима. | **Не применяется** — прозрачное проксирование |
+| `POST`, `GET`, `DELETE` | `/v1/files`, `/v1/files/{id}`, `/v1/files/{id}/content` | Anthropic Files API (загрузка / список / метаданные / скачивание / удаление). | **Не применяется** — прозрачное проксирование (загрузка дополнительно зеркалируется в аудит, см. 5.6) |
 
-Для `chat/completions` доступен полный контур проверок политиками HiveTrace.
+Полный контур проверок политиками HiveTrace доступен для `/v1/chat/completions` и `/v1/messages`.
 
 ---
 
@@ -74,13 +85,14 @@ Gateway использует **двухуровневую** модель авт�
 
 ### 3.1. Клиент → Gateway
 
-Клиент передает заголовок `X-HiveTrace-Api-Key: <gateway-key>` — **обязательный** ключ доступа к gateway. Без него любой запрос ко всем эндпоинтам (`/v1/chat/completions`, `/v1/embeddings`, `/v1/models`) отклоняется со статусом `401 invalid_request_error`. Этим же ключом gateway аутентифицируется в HiveTrace при исходящих вызовах, поэтому переключение клиентского ключа автоматически переключает идентичность gateway в HiveTrace — **серверный токен в env не используется и был удалён**.
+Клиент передает заголовок `X-HiveTrace-Api-Key: <gateway-key>` — **обязательный** ключ доступа к gateway. Без него любой запрос ко всем эндпоинтам (`/v1/chat/completions`, `/v1/messages`, `/v1/embeddings`, `/v1/models`, `/v1/files`) отклоняется со статусом `401 invalid_request_error`. Этим же ключом gateway аутентифицируется в HiveTrace при исходящих вызовах, поэтому переключение клиентского ключа автоматически переключает идентичность gateway в HiveTrace — **серверный токен в env не используется и был удалён**.
 
 ### 3.2. Клиент → Gateway → Апстрим
 
-Клиент передает заголовок `Authorization: Bearer <key>`. **Gateway не валидирует и не сохраняет этот токен**; он передается в апстрим без изменений. Это означает следующее:
+Клиент передает заголовок `Authorization: Bearer <key>` (OpenAI) или `x-api-key: <key>` (Anthropic SDK). **Gateway не валидирует и не сохраняет этот токен**; он передается в апстрим без изменений. Это означает следующее:
 
 - `<key>` должен быть действительным ключом **апстрима** (например, OpenAI API key для прямого обращения к OpenAI или ключ LiteLLM).
+- Для Anthropic-формата Anthropic SDK отправляет ключ в `x-api-key`; gateway пробрасывает его (вместе с `anthropic-version` / `anthropic-beta`) в Anthropic-passthrough апстрима.
 
 ### 3.3. Приложения
 
@@ -92,16 +104,18 @@ Gateway использует **двухуровневую** модель авт�
 
 Колонка «Источник» обозначает, относится ли заголовок к стандарту OpenAI (проксируется в апстрим без интерпретации gateway) или является расширением gateway (обрабатывается gateway, в апстрим не пробрасывается).
 
-| Заголовок                        | Источник | Обязательность          | Назначение                                                                                                                             |
-| -------------------------------- | -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authorization: Bearer <key>`    | OpenAI   | для апстрима            | Ключ апстрима. Передаётся в апстрим без изменений и валидации.                                                                         |
-| `Content-Type: application/json` | OpenAI   | для non-stream запросов | Стандартный для OpenAI API.                                                                                                            |
-| `Accept: text/event-stream`      | OpenAI   | для stream-запросов     | Стандартный для OpenAI streaming.                                                                                                      |
-| `X-HiveTrace-Api-Key`            | Gateway  | **да**                  | Ключ доступа к gateway. Также используется как Bearer в исходящих вызовах gateway → HiveTrace. Отсутствие или пустое значение → `401`. |
-| `X-Application-Id`               | Gateway  | нет                     | UUID приложения в HiveTrace. Определяет per-app политику. При отсутствии — fallback на ENV `HIVETRACE_APPLICATION_ID`.                 |
-| `X-User-Id`                      | Gateway  | нет                     | Идентификатор конечного пользователя для аудита.                                                                                       |
-| `X-Session-Id`                   | Gateway  | нет                     | Идентификатор пользовательской сессии.                                                                                                 |
-| `X-Attached-Files`               | Gateway  | нет                     | JSON-массив дескрипторов вложений для отдельной аудит-копии в HiveTrace. Формат — раздел 5.3.2.                                        |
+| Заголовок | Источник | Обязательность | Назначение |
+|---|---|---|---|
+| `Authorization: Bearer <key>` | OpenAI | для апстрима | Ключ апстрима. Передаётся в апстрим без изменений и валидации. |
+| `x-api-key: <key>` | Anthropic | для апстрима (Anthropic) | Ключ апстрима для Anthropic SDK. Пробрасывается без изменений. |
+| `anthropic-version`, `anthropic-beta` | Anthropic | для Anthropic-запросов | Стандартные заголовки Anthropic (напр. `anthropic-beta: files-api-2025-04-14`). Пробрасываются в апстрим. |
+| `Content-Type: application/json` | OpenAI | для non-stream запросов | Стандартный для OpenAI API. |
+| `Accept: text/event-stream` | OpenAI | для stream-запросов | Стандартный для OpenAI streaming. |
+| `X-HiveTrace-Api-Key` | Gateway | **да** | Ключ доступа к gateway. Также используется как Bearer в исходящих вызовах gateway → HiveTrace. Отсутствие или пустое значение → `401`. |
+| `X-Application-Id` | Gateway | нет | UUID приложения в HiveTrace. Определяет per-app политику. При отсутствии — fallback на ENV `HIVETRACE_APPLICATION_ID`. |
+| `X-User-Id` | Gateway | нет | Идентификатор конечного пользователя для аудита. |
+| `X-Session-Id` | Gateway | нет | Идентификатор пользовательской сессии. |
+| `X-Attached-Files` | Gateway | нет | JSON-массив дескрипторов вложений для отдельной аудит-копии в HiveTrace. Формат — раздел 5.3.2. |
 
 ---
 
@@ -153,11 +167,11 @@ curl -X POST http://gateway:4100/v1/chat/completions \
 
 Передача файлов поддерживается двумя стратегиями. Они решают разные задачи и могут использоваться по отдельности или одновременно.
 
-| Стратегия                            | Файл попадает в LLM | Файл попадает в HiveTrace (audit) | Изменения в OpenAI-клиенте    |
-| ------------------------------------ | ------------------- | --------------------------------- | ----------------------------- |
-| 5.3.1. Стандарт OpenAI (multimodal)  | Да                  | Нет                               | Не требуются                  |
-| 5.3.2. Заголовок `X-Attached-Files`  | Нет                 | Да                                | Один дополнительный заголовок |
-| 5.3.3. Обе стратегии в одном запросе | Да                  | Да                                | Один дополнительный заголовок |
+| Стратегия | Файл попадает в LLM | Файл попадает в HiveTrace (audit) | Изменения в OpenAI-клиенте |
+|---|---|---|---|
+| 5.3.1. Стандарт OpenAI (multimodal) | Да | Нет | Не требуются |
+| 5.3.2. Заголовок `X-Attached-Files` | Нет | Да | Один дополнительный заголовок |
+| 5.3.3. Обе стратегии в одном запросе | Да | Да | Один дополнительный заголовок |
 
 #### 5.3.1. Стратегия 1 — стандарт OpenAI (multimodal `messages[].content`)
 
@@ -222,12 +236,12 @@ curl -X POST http://gateway:4100/v1/chat/completions \
 
 Формат дескриптора (`X-Attached-Files` — JSON-массив, элементы содержат либо `url`, либо `content_base64`):
 
-| Поле             | Тип    | Описание                                                                                            |
-| ---------------- | ------ | --------------------------------------------------------------------------------------------------- |
-| `url`            | string | HTTP/HTTPS URL файла. Поддерживается также `data:` URI с inline base64.                             |
-| `content_base64` | string | Base64-кодированное содержимое файла. Альтернатива `url`.                                           |
-| `name`           | string | Имя файла. Используется при сохранении в HiveTrace; при отсутствии выводится из URL.                |
-| `type`           | string | MIME-тип файла. При отсутствии определяется по расширению или `Content-Type` ответа при скачивании. |
+| Поле | Тип | Описание |
+|---|---|---|
+| `url` | string | HTTP/HTTPS URL файла. Поддерживается также `data:` URI с inline base64. |
+| `content_base64` | string | Base64-кодированное содержимое файла. Альтернатива `url`. |
+| `name` | string | Имя файла. Используется при сохранении в HiveTrace; при отсутствии выводится из URL. |
+| `type` | string | MIME-тип файла. При отсутствии определяется по расширению или `Content-Type` ответа при скачивании. |
 
 Алиас заголовка: `X-AttachedFiles`.
 
@@ -287,17 +301,95 @@ curl -X POST http://gateway:4100/v1/chat/completions \
 
 ### Лимиты на вложения
 
-| Параметр                         | Дефолт | ENV                               |
-| -------------------------------- | ------ | --------------------------------- |
-| Максимальный размер одного файла | 20 MiB | `HIVETRACE_FILES_MAX_BYTES`       |
-| Параллельных скачиваний          | 4      | `HIVETRACE_FILES_MAX_CONCURRENCY` |
-| Таймаут скачивания одного файла  | 60 с   | `HIVETRACE_FILES_TIMEOUT`         |
+| Параметр | Дефолт | ENV |
+|---|---|---|
+| Максимальный размер одного файла | 20 MiB | `HIVETRACE_FILES_MAX_BYTES` |
+| Параллельных скачиваний | 4 | `HIVETRACE_FILES_MAX_CONCURRENCY` |
+| Таймаут скачивания одного файла | 60 с | `HIVETRACE_FILES_TIMEOUT` |
 
 Файл, превышающий лимит, исключается из обработки с записью предупреждения в лог; остальные вложения продолжают обрабатываться.
 
 ### 5.4. Лимиты на размер тела запроса
 
 Gateway не накладывает собственный лимит на размер тела запроса. Контроль выполняется на стороне апстрима.
+
+### 5.5. Anthropic Messages API (`/v1/messages`)
+
+Тело запроса соответствует payload Anthropic Messages (`model`, `max_tokens`, `system`, `messages[]` с блоками `content`). Специфичных для gateway полей в теле нет; идентификаторы передаются теми же заголовками, что и для OpenAI (раздел 4).
+
+```bash
+curl -X POST http://gateway:4100/v1/messages \
+  -H "x-api-key: <upstream-key>" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "X-HiveTrace-Api-Key: <gateway-key>" \
+  -H "Content-Type: application/json" \
+  -H "X-Application-Id: 11111111-…" \
+  -H "X-User-Id: alice@company.com" \
+  -H "X-Session-Id: session-2025-04-28-abc" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 1024,
+    "messages": [{"role": "user", "content": "Привет!"}]
+  }'
+```
+
+Для Anthropic SDK gateway задаётся через `base_url`, а ключ доступа к gateway — через `default_headers`:
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    base_url="http://gateway:4100",
+    api_key="<upstream-key>",                 # → x-api-key, пробрасывается в апстрим
+    default_headers={
+        "X-HiveTrace-Api-Key": "<gateway-key>",
+        "X-Application-Id": "11111111-…",
+        "X-User-Id": "alice@company.com",
+        "X-Session-Id": "session-2025-04-28-abc",
+    },
+)
+client.messages.create(
+    model="claude-sonnet-4-6", max_tokens=1024,
+    messages=[{"role": "user", "content": "Привет!"}],
+)
+```
+
+Поведение:
+
+- **LLM.** Тело форвардится в Anthropic-passthrough апстрима без изменений (исключение: `stream: true → false` при `app_mode=sync`, см. 6.3.2).
+- **HiveTrace.** В `user_prompt` записывается текст из `text`-блоков последнего сообщения `user`; в `llm_answer` — текст из `text`-блоков ответа. Файлы, переданные блоком `document`/`image` (base64) или ссылкой `file_id`, прикрепляются к аудит-записи (раздел 5.6).
+- Стриминг (`stream: true`) поддерживается в асинхронном режиме; формат SSE — нативный Anthropic (раздел 6.4).
+
+### 5.6. Anthropic Files API (`/v1/files`)
+
+Прозрачное проксирование Anthropic Files API в апстрим (LiteLLM `/anthropic/v1/files` → `api.anthropic.com`). Пайплайн guardrail не применяется. Загрузка идёт `multipart/form-data`, скачивание возвращает бинарный поток.
+
+```bash
+# Загрузка файла (Anthropic SDK выставляет anthropic-beta автоматически)
+curl -X POST http://gateway:4100/v1/files \
+  -H "x-api-key: <upstream-key>" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "anthropic-beta: files-api-2025-04-14" \
+  -H "X-HiveTrace-Api-Key: <gateway-key>" \
+  -F "file=@report.pdf;type=application/pdf"
+# → {"id": "file_…", "type": "file", …}
+
+# Скачивание (только артефакты skills / code execution; загруженные файлы Anthropic скачивать не даёт)
+curl http://gateway:4100/v1/files/<file_id>/content \
+  -H "x-api-key: <upstream-key>" -H "X-HiveTrace-Api-Key: <gateway-key>" -o out.bin
+```
+
+Загруженный `file_id` затем указывается в `/v1/messages` блоком `document`:
+
+```json
+{"type": "document", "source": {"type": "file", "file_id": "file_…"}}
+```
+
+Зеркалирование в аудит HiveTrace (паритет со стратегией `X-Attached-Files` OpenAI-пути):
+
+- При загрузке через `/v1/files` gateway сохраняет содержимое в кэше `file_id → bytes` (Redis).
+- Когда `/v1/messages` ссылается на этот `file_id`, gateway достаёт байты из кэша и прикрепляет файл к `user_prompt`. Inline base64-блоки прикрепляются напрямую, без кэша.
+- **Требуется Redis** (`GATEWAY_REDIS_URL` или `REDIS_*`). Без Redis загрузка и сам запрос работают, но файлы по `file_id` в аудит не попадают (base64-блоки — попадают). TTL кэша — `HIVETRACE_FILES_CACHE_TTL_SECONDS` (раздел 9), размер — `HIVETRACE_FILES_MAX_BYTES`.
 
 ---
 
@@ -309,18 +401,18 @@ Gateway не накладывает собственный лимит на ра�
 
 ```json
 {
-	"id": "chatcmpl-…",
-	"object": "chat.completion",
-	"created": 1234567890,
-	"model": "gpt-5",
-	"choices": [
-		{
-			"index": 0,
-			"message": { "role": "assistant", "content": "..." },
-			"finish_reason": "stop"
-		}
-	],
-	"usage": { "prompt_tokens": 23, "completion_tokens": 45, "total_tokens": 68 }
+  "id": "chatcmpl-…",
+  "object": "chat.completion",
+  "created": 1234567890,
+  "model": "gpt-5",
+  "choices": [
+    {
+      "index": 0,
+      "message": {"role": "assistant", "content": "..."},
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {"prompt_tokens": 23, "completion_tokens": 45, "total_tokens": 68}
 }
 ```
 
@@ -356,40 +448,92 @@ data: [DONE]
 
 ```json
 {
-	"id": "hivetrace-guardrails-<uuid>",
-	"object": "chat.completion",
-	"created": 1717171717,
-	"model": "<запрошенная или 'unknown'>",
-	"choices": [
-		{
-			"index": 0,
-			"message": {
-				"role": "assistant",
-				"content": "<фраза из политики приложения>"
-			},
-			"finish_reason": "stop"
-		}
-	],
-	"usage": { "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0 },
-	"metadata": {
-		"hivetrace": {
-			"response_replaced": true,
-			"response_replacement": {
-				"stage": "pre_call",
-				"type": "<guardrails|custom_policy|dataclean>",
-				"request_id": "<metadata.request_id из тела запроса или сгенерированный UUID>"
-			},
-			"prepared_response": { "...": "контекст вердикта от HiveTrace" }
-		}
-	}
+  "id": "hivetrace-guardrails-<uuid>",
+  "object": "chat.completion",
+  "created": 1717171717,
+  "model": "<запрошенная или 'unknown'>",
+  "choices": [
+    {
+      "index": 0,
+      "message": {"role": "assistant", "content": "<фраза из политики приложения>"},
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+  "metadata": {
+    "hivetrace": {
+      "response_replaced": true,
+      "response_replacement": {
+        "stage": "pre_call",
+        "type": "<guardrails|custom_policy|dataclean>",
+        "request_id": "<metadata.request_id из тела запроса или сгенерированный UUID>"
+      },
+      "prepared_response": { "...": "контекст вердикта от HiveTrace" }
+    }
+  }
 }
 ```
 
 Клиент может определить факт замены по наличию `metadata.hivetrace.response_replaced == true` либо по префиксу `id` (`hivetrace-…`).
 
+
 #### 6.3.2. Streaming + sync mode
 
-В режиме `sync` gateway **принудительно отключает** `stream: true` (заменяя его на `stream: false`) еще до обращения к HiveTrace. Причина заключается в том, что подмена SSE-ответа после начала передачи клиенту технически невозможна. Поэтому в `sync`-режиме клиент всегда получает non-streaming ответ, даже если в `body.stream` было указано `true`.
+В режиме `sync` gateway **принудительно отключает** `stream: true` (заменяя его на `stream: false`) еще до обращения к HiveTrace. Причина заключается в том, что подмена SSE-ответа после начала передачи клиенту технически невозможна. Поэтому в `sync`-режиме клиент всегда получает non-streaming ответ, даже если в `body.stream` было указано `true`. Это справедливо и для `/v1/messages`.
+
+### 6.4. Формат ответа Anthropic (`/v1/messages`)
+
+Тело ответа и HTTP-статус полностью соответствуют ответу Anthropic-апстрима.
+
+Non-streaming — `application/json`, нативная форма Anthropic `message`:
+
+```json
+{
+  "id": "msg_…",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-4-6",
+  "content": [{"type": "text", "text": "..."}],
+  "stop_reason": "end_turn",
+  "usage": {"input_tokens": 23, "output_tokens": 45}
+}
+```
+
+Streaming — `text/event-stream`, нативная последовательность событий Anthropic (типизированные `event:`-кадры, **без** терминатора `data: [DONE]`):
+
+```
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_…", …}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"При"}}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":7}}
+
+event: message_stop
+data: {"type":"message_stop"}
+
+```
+
+Между кадрами так же могут передаваться comment-кадры `: keepalive` для поддержания соединения.
+
+**Подмена ответа политикой** (`app_mode=sync`, аналогично разделу 6.3) для `/v1/messages` синтезируется в форме Anthropic `message`:
+
+```json
+{
+  "id": "hivetrace-guardrails-<uuid>",
+  "type": "message",
+  "role": "assistant",
+  "model": "<запрошенная или 'unknown'>",
+  "content": [{"type": "text", "text": "<фраза из политики приложения>"}],
+  "stop_reason": "end_turn",
+  "usage": {"input_tokens": 0, "output_tokens": 0},
+  "metadata": {"hivetrace": {"response_replaced": true, "response_replacement": {"stage": "pre_call", "type": "guardrails", "request_id": "…"}}}
+}
+```
+
+Факт замены определяется по `metadata.hivetrace.response_replaced == true` или по префиксу `id` (`hivetrace-…`).
 
 ---
 
@@ -412,21 +556,21 @@ data: [DONE]
 
 ### 7.1. Полная таблица
 
-| Статус | Источник                        | Условие                                                                                                                              | Тип в `error.type`                    |
-| ------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
-| `400`  | gateway                         | Невалидный JSON в теле запроса                                                                                                       | `invalid_request_error`               |
-| `400`  | апстрим                         | Бизнес-валидация (отсутствует `messages`, превышен context window, и т.п.)                                                           | `invalid_request_error` (passthrough) |
-| `401`  | gateway                         | Отсутствует или пустой заголовок `X-HiveTrace-Api-Key`                                                                               | `invalid_request_error`               |
-| `401`  | апстрим                         | `Authorization: Bearer` отвергнут апстримом                                                                                          | `invalid_request_error` (passthrough) |
-| `403`  | апстрим                         | Авторизация прошла, но действие запрещено (например, organization without quota)                                                     | passthrough                           |
-| `404`  | апстрим                         | Указанная `модель` не существует                                                                                                     | `invalid_request_error` (passthrough) |
-| `413`  | апстрим / прокси                | Тело слишком большое                                                                                                                 | `upstream_error`                      |
-| `422`  | апстрим                         | Payload не прошел валидацию (strict-mode схемы)                                                                                      | passthrough                           |
-| `429`  | апстрим                         | Rate limit                                                                                                                           | `rate_limit_error` (passthrough)      |
-| `500`  | апстрим                         | Внутренняя ошибка апстрима                                                                                                           | `upstream_error`                      |
-| `502`  | gateway                         | Сетевая ошибка между gateway и апстримом (DNS, refused, TLS). Также — `httpx.ReadTimeout` ДО первого байта на non-streaming запросе. | `gateway_error`                       |
-| `503`  | апстрим                         | Апстрим недоступен (maintenance, перегруз)                                                                                           | `upstream_error`                      |
-| `504`  | — _(только в SSE error-кадрах)_ | mid-stream `httpx.TimeoutException`                                                                                                  | `upstream_error`                      |
+| Статус | Источник | Условие | Тип в `error.type` |
+|---|---|---|---|
+| `400` | gateway | Невалидный JSON в теле запроса | `invalid_request_error` |
+| `400` | апстрим | Бизнес-валидация (отсутствует `messages`, превышен context window, и т.п.) | `invalid_request_error` (passthrough) |
+| `401` | gateway | Отсутствует или пустой заголовок `X-HiveTrace-Api-Key` | `invalid_request_error` |
+| `401` | апстрим | `Authorization: Bearer` отвергнут апстримом | `invalid_request_error` (passthrough) |
+| `403` | апстрим | Авторизация прошла, но действие запрещено (например, organization without quota) | passthrough |
+| `404` | апстрим | Указанная `модель` не существует | `invalid_request_error` (passthrough) |
+| `413` | апстрим / прокси | Тело слишком большое | `upstream_error` |
+| `422` | апстрим | Payload не прошел валидацию (strict-mode схемы) | passthrough |
+| `429` | апстрим | Rate limit | `rate_limit_error` (passthrough) |
+| `500` | апстрим | Внутренняя ошибка апстрима | `upstream_error` |
+| `502` | gateway | Сетевая ошибка между gateway и апстримом (DNS, refused, TLS). Также — `httpx.ReadTimeout` ДО первого байта на non-streaming запросе. | `gateway_error` |
+| `503` | апстрим | Апстрим недоступен (maintenance, перегруз) | `upstream_error` |
+| `504` | — *(только в SSE error-кадрах)* | mid-stream `httpx.TimeoutException` | `upstream_error` |
 
 ---
 
@@ -434,12 +578,12 @@ data: [DONE]
 
 ### 8.1. Таймауты по слоям
 
-| Слой                                                            | Параметр                           | Дефолт | Кто контролирует |
-| --------------------------------------------------------------- | ---------------------------------- | ------ | ---------------- |
-| Gateway → апстрим (один HTTP-вызов)                             | `GATEWAY_UPSTREAM_TIMEOUT`         | 120 с  | gateway          |
-| Gateway → HiveTrace (`/process_request/`, `/process_response/`) | `HIVETRACE_TIMEOUT`                | 60 с   | gateway          |
-| Gateway → URL вложения (скачивание)                             | `HIVETRACE_FILES_TIMEOUT`          | 60 с   | gateway          |
-| Gateway → клиент: SSE keepalive                                 | `GATEWAY_STREAM_HEARTBEAT_SECONDS` | 60 с   | gateway          |
+| Слой | Параметр | Дефолт | Кто контролирует |
+|---|---|---|---|
+| Gateway → апстрим (один HTTP-вызов) | `GATEWAY_UPSTREAM_TIMEOUT` | 120 с | gateway |
+| Gateway → HiveTrace (`/process_request/`, `/process_response/`) | `HIVETRACE_TIMEOUT` | 60 с | gateway |
+| Gateway → URL вложения (скачивание) | `HIVETRACE_FILES_TIMEOUT` | 60 с | gateway |
+| Gateway → клиент: SSE keepalive | `GATEWAY_STREAM_HEARTBEAT_SECONDS` | 60 с | gateway |
 
 ---
 
@@ -450,12 +594,17 @@ data: [DONE]
 ```bash
 # Апстрим
 UPSTREAM_URL=http://litellm:4000
+# Префикс Anthropic-passthrough на апстриме (для /v1/messages и /v1/files)
+ANTHROPIC_PASSTHROUGH_PREFIX=/anthropic/v1
 
 # HiveTrace
 HIVETRACE_URL=https://hivetrace.example.com/api
 HIVETRACE_APPLICATION_ID=<default app uuid>
+# TTL кэша file_id→bytes для зеркалирования файлов в аудит (0 — отключить)
+HIVETRACE_FILES_CACHE_TTL_SECONDS=86400
 
-# Redis (для per-app политик; опционально, если блокировки не требуются)
+# Redis (per-app политики + кэш file_id→bytes для аудита Anthropic-файлов;
+# опционально, если блокировки и аудит файлов по file_id не требуются)
 REDIS_HOST=redis
 REDIS_PORT=6379
 REDIS_DB=0
@@ -472,4 +621,4 @@ REDIS_SSL=False
 
 ### 9.3. Поведение при отсутствии Redis
 
-Если Redis не сконфигурирован, per-app политики блокировки недоступны; pre-call и post-call телеметрия в HiveTrace отправляется в режиме `async` по умолчанию.
+Если Redis не сконфигурирован, per-app политики блокировки недоступны; pre-call и post-call телеметрия в HiveTrace отправляется в режиме `async` по умолчанию. Дополнительно становится недоступно зеркалирование Anthropic-файлов по `file_id` в аудит (раздел 5.6): загрузка и сами запросы работают, но в аудит попадают только inline base64-вложения.
