@@ -19,5 +19,5 @@ SDK HiveTrace подключает мониторинг запросов, отв
 
 ## С чего начать
 
-- Для приложения с одной моделью см. раздел [**Одна LLM**](./single-llm-applications/)
+- Для приложения с одной моделью см. раздел [**Одна LLM**](./single-llm-applications.md)
 Документация сверена с `origin/main` репозитория `HiveTrace/hivetrace-sdk`, коммит `37a846c`.

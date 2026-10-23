@@ -12,9 +12,10 @@ sidebar:
 
 При включенных модулях HiveTrace выполняет:
 
-- обнаружение и маскирование чувствительных данных (dataclean)
+- обнаружение, удаление, маскирование и псевдонимизацию чувствительных данных (dataclean)
 - проверку встроенных политик (guardrails)
 - проверку пользовательских политик
+- проверку языка
 - расчет потребления токенов
 - связывание сессии и пользователя
 - сохранение результатов мониторинга
@@ -27,8 +28,9 @@ sidebar:
 
 При включенных модулях HiveTrace выполняет:
 
-- обнаружение и маскирование чувствительных данных (dataclean)
+- обнаружение, удаление, маскирование и псевдонимизацию чувствительных данных (dataclean)
 - проверку встроенных политик (guardrails)
+- проверку языка
 - расчет потребления токенов
 - связывание сессии и пользователя
 - сохранение результатов мониторинга
@@ -54,6 +56,8 @@ sidebar:
 | ----------------------- | -------- | -------------------------------------------------- |
 | `additional_parameters` | `object` | Метаданные для отслеживания сессии и пользователя. |
 
+> **Примечание:** для псевдонимизации и обратной замены требуется `additional_parameters.session_id`.
+
 ---
 
 ## Структура additional_parameters
@@ -71,17 +75,37 @@ sidebar:
 
 | Поле                     | Тип              | Описание                                                          |
 | ------------------------ | ---------------- | ----------------------------------------------------------------- |
+| `decision`               | `string`         | `allow \| deny \| accepted`                                       |
+| `message`                | `string \| null` | Кастомная фраза при нарушении (может быть пустым).                |
+| `block_reasons[]`        | `array`          | Список кодов и источников блокировки (может быть пустым).         |
+| `user_block.blocked`     | `boolean`        | Флаг, показывающий, был ли пользователь заблокирован.             |
+| `user_block.blocked_until`| `string \| null`| Момент времени, до которого действует блокировка пользователя (может быть пустым). |
 | `request_id`             | `string`         | UUID записи анализа.                                              |
 | `schema_version`         | `string`         | Версия схемы ответа.                                              |
 | `status`                 | `string`         | `success \| partial_success \| error`                             |
 | `errors`                 | `string[]`       | Список ошибок обработки (может быть пустым).                      |
+| `warnings`               | `string[]`       | Список предупреждений (может быть пустым).                        |
 | `tokens.count`           | `integer`        | Количество обработанных токенов.                                  |
-| `tokens.usage_severity`  | `string \| null` | `low \| high \| critical`                                         |
+| `tokens.usage_severity`  | `string \| null` | `low \| high \| critical \| null`                                 |
 | `guardrails.flagged`     | `boolean`        | Флаг нарушения встроенных политик.                                |
-| `custom_policy.flagged`  | `boolean`        | Флаг нарушения пользовательских политик.                          |
-| `dataclean.flagged`      | `boolean`        | Показывает, что были обнаружены чувствительные данные.            |
-| `dataclean.cleaned_text` | `string \| null` | Санитизированная версия сообщения после маскирования или очистки. |
-| `dataclean.types[]`      | `array`          | Типы обнаруженных сущностей и их количество.                      |
+| `guardrails.truncated`   | `boolean`        | Флаг, показывающий, была ли усечена обработка Guardrails          |
+| `custom_policy.message.model.flagged`| `boolean`| Флаг нарушения кастомной политики.                            |
+| `custom_policy.message.blacklist.flagged`| `boolean`| Флаг нарушения по чёрному списку сообщений.               |
+| `custom_policy.file.blacklist.flagged`| `boolean`| Флаг нарушения по чёрному списку файлов.                     |
+| `dataclean.flagged`      | `boolean`        | Флаг, показывающий, были ли обнаружены чувствительные данные в сообщении или во вложенном файле.                                                                                 |
+| `dataclean.message.flagged`| `boolean`      | Флаг, показывающий, были ли обнаружены чувствительные данные в сообщении. |
+| `dataclean.message.text_modified`|`boolean`| Флаг, показыващий, был ли текст изменён в ходе обработки.          |
+| `dataclean.message.cleaned_text`|`string`  | Санитизированная версия сообщения после обработки. При типе обработки `Детекция` текст остаётся без изменений. |
+| `dataclean.message.types[]`| `array`   | Типы обнаруженных сущностей и их количество.                           |
+| `dataclean.message.entities[]` | `array` | Типы обнаруженных сущностей, их позиция в исходном и обработанном тексте, а также их значение. |
+| `dataclean.file.flagged` | `boolean`         | Флаг, показывающий, были ли обнаружены чувствительные данные во вложенном файле. |
+| `dataclean.file.save_failed`| `boolean`      | Флаг, показывающий, был ли сохранён файл.                        |
+| `dataclean.file.check_failed` | `boolean` | Флаг, показывающий, была ли выполнена проверка файла.               |
+| `dataclean.file.files[]` | `array` | Список с результатами детализации по каждому файлу.                          |
+| `language.flagged` | `boolean`         | Флаг нарушения по несоответствию языка.                                |
+| `language.enforced`| `boolean`      | Флаг, показывающий, была ли установлена блокировка при обнаружении несоответствия языка. |
+| `language.status` | `string` | `disabled \| checked \| error`                                                   |
+| `language.error` | `string \| null` | Причина ошибки (может быть пустым).                                       |
 
 ### Структура dataclean.types
 
@@ -136,29 +160,76 @@ curl -sS -X POST "$BASE_URL/process_response/" \
 
 ```json
 {
-	"request_id": "62c51dcf-f7bb-44d3-8c3a-6007b2a44d7d",
-	"schema_version": "2.0.0",
-	"status": "success",
-	"errors": [],
-	"tokens": {
-		"count": 8,
-		"usage_severity": null
-	},
-	"guardrails": {
-		"flagged": false
-	},
-	"custom_policy": {
-		"flagged": false
-	},
-	"dataclean": {
-		"flagged": true,
-		"cleaned_text": "My name is XXXX",
-		"types": [
-			{
-				"type": "NAME",
-				"count": 1
-			}
-		]
-	}
+    "decision": "allow",
+    "message": null,
+    "block_reasons": [],
+    "user_block": {
+        "blocked": false,
+        "blocked_until": null
+    },
+    "request_id": "6c769c7a-f513-47e5-836a-5d59e0587c5b",
+    "schema_version": "2.4.0",
+    "status": "success",
+    "errors": [],
+    "warnings": [],
+    "tokens": {
+        "count": 19,
+        "usage_severity": null
+    },
+    "guardrails": {
+        "flagged": false,
+        "truncated": false
+    },
+    "custom_policy": {
+        "message": {
+            "model": {
+                "flagged": false
+            },
+            "blacklist": {
+                "flagged": false
+            }
+        },
+        "file": {
+            "blacklist": {
+                "flagged": false
+            }
+        }
+    },
+    "dataclean": {
+        "flagged": true,
+        "message": {
+            "flagged": true,
+            "text_modified": true,
+            "cleaned_text": "Отпишитесь по моему балансу на XXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "types": [
+                {
+                    "type": "EMAIL",
+                    "count": 1
+                }
+            ],
+            "entities": [
+                {
+                    "type": "EMAIL",
+                    "start": 31,
+                    "end": 57,
+                    "processed_start": 31,
+                    "processed_end": 57,
+                    "text": "Roxane_Stracke58@gmail.com"
+                }
+            ]
+        },
+        "file": {
+            "flagged": false,
+            "save_failed": false,
+            "check_failed": false,
+            "files": []
+        }
+    },
+    "language": {
+        "flagged": false,
+        "enforced": false,
+        "status": "disabled",
+        "error": null
+    }
 }
 ```
