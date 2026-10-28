@@ -1,21 +1,50 @@
 ---
 title: "Policies"
-description: "Configure HiveTrace Guardrail, token thresholds, custom policies, and blacklists."
+description: "Configure HiveTrace Guardrail and custom policies."
 sidebar:
   order: 4
 ---
 
-Policies are configured separately for each application. They let you enable the built-in HiveTrace protection, define threat thresholds, create custom rules for user requests, and check messages or files against blacklists.
+Policies are configured separately for each application. They let you enable the built-in HiveTrace protection, and create custom rules for user requests.
 
-## Open policy settings
+## Opening policy settings
 
-1. Select **Applications** in the sidebar.
-2. Open an application by clicking its ID.
-3. Select the **Policies** tab.
+1. In the sidebar, select **Applications**.
+2. Open the required application by clicking its card or its name, depending on the selected view.
+3. Hover over the **Protection** tab.
+4. Click **Censoring policies**.
 
-The page contains HiveTrace Guardrail settings, token thresholds, custom policies, and message and file blacklists.
+![Navigating to the Censoring policies section](../../../../../assets/img/en/policies-redirect-4-4.webp)
 
-![Application policy page overview](../../../../../assets/img/policies-overview-4-3.webp)
+The page header displays the application's name, ID, and description (if any). The copy button is available next to the ID. The header also contains the `Back to applications` link that leads to the `Applications` section.
+
+## Editing the application
+
+![Policies - editing the application](../../../../../assets/img/en/policies-edit-app-4-4.webp)
+
+1. Click `Edit`.
+2. Change the required fields.
+3. Click `Save`.
+
+## Deleting the application
+
+![Policies - deleting the application](../../../../../assets/img/en/policies-delete-app-4-4.webp)
+
+1. Click `Delete`.
+2. Confirm the deletion in the confirmation dialog.
+
+This action cannot be undone. Prior to deletion, please verify that integration traffic has been stopped or redirected and that the associated API tokens are no longer in use.
+
+## Profile
+
+If a profile is selected, its name is displayed. If no profile is selected, individual settings are applied. When the application's protection settings are changed, the application is removed from the profile, and the current settings become individual.
+
+The profile can be updated on the page:
+1. Click the `Profile` button.
+2. Select the required profile from the list. The search field helps narrow the list.
+3. Confirm applying the profile to the application in the confirmation dialog.
+
+![Policies - profile](../../../../../assets/img/en/policies-profile-4-4.webp)
 
 ## HiveTrace Guardrail
 
@@ -24,40 +53,30 @@ HiveTrace Guardrail provides built-in protection against unsafe requests. Enable
 - **Input** checks messages sent from the user to the model.
 - **Output** checks model responses before they are returned to the user.
 
-Select **Save** to apply changes. **Reset** discards unsaved changes and restores the last saved values.
+Select **Save** to apply changes. **Reset to Defaults** discards unsaved changes and restores the last saved values.
 
-## Token thresholds
+![HiveTrace Guardrail](../../../../../assets/img/en/policies-guardrail-4-4.webp)
 
-Token thresholds map a check result to a threat level. Set all three required values:
-
-- **Low** is the first trigger boundary.
-- **High** is the elevated-risk boundary.
-- **Critical** is the critical-risk boundary.
-
-Values must be ascending: Low must be less than High, and High must be less than Critical. Select **Save** to apply the values or **Reset** to discard unsaved changes.
-
-![Token threshold settings](../../../../../assets/img/policies-token-thresholds-4-3.webp)
-
-## Custom policies
+## Custom Policies
 
 A custom policy validates user requests using an instruction prompt. The **Model rules** table displays the name and prompt of every policy.
 
-![Custom policy table](../../../../../assets/img/policies-custom-list-4-3.webp)
+![Custom policy table](../../../../../assets/img/en/policies-custom-policies-table-4-4.webp)
 
 Available actions:
 
-- **Add new policy** opens the policy form.
+- **Add policy** opens the policy form.
 - A row checkbox selects a policy; the header checkbox selects all visible rows.
-- **Delete selected** removes the selected policies and is enabled after at least one row is selected.
-- **Column settings** controls which table columns are visible.
-- The row **⋮** menu edits or deletes one policy.
+- **Delete Selected** removes the selected policies and is enabled after at least one row is selected.
+- **Customized Columns** controls which table columns are visible.
+- The row **⋮** menu is used to edit or delete a specific policy, as well as to work with the policy version history, where previous versions can be viewed and the required one restored.
 - **Rows per page**, **Previous**, and **Next** control pagination.
 
-### Create, edit, and test a policy
+### Creating, editing, and testing a policy
 
-Select **Add new policy**, or choose Edit from a row's **⋮** menu. Complete these fields:
+Select **Add policy**, or choose Edit from a row's **⋮** menu. Complete these fields:
 
-1. **Name** — a clear, unique rule name.
+1. **Name** — a clear rule name.
 2. **Prompt** — the instruction used to validate user requests.
 3. **Input** — enables the policy for incoming messages.
 
@@ -68,36 +87,8 @@ Use the test panel on the right to enter a sample request and send it:
 
 Test both prohibited and acceptable wording. Select **Save** when finished; **Cancel** closes the form without saving.
 
-![Editing and testing a custom policy](../../../../../assets/img/policies-custom-edit-test-4-3.webp)
-
-## Message blacklist
-
-Patterns in this section are applied to message text. Each card contains the pattern name, an **Enable** switch, an information button, and a **⋮** menu for editing or deletion.
-
-Select **Add pattern** to create a rule. A disabled pattern remains saved but is not used during checks.
-
-![Message blacklist](../../../../../assets/img/policies-message-blacklist-4-3.webp)
-
-## File blacklist
-
-The **Files → Blacklist** section works in the same way, but applies its patterns to the contents of files attached to a request. Individual rules can be enabled or disabled, inspected, edited, or deleted.
-
-![File blacklist](../../../../../assets/img/policies-file-blacklist-4-3.webp)
-
-## Add a pattern
-
-Select **Add pattern** in the appropriate section and complete the form:
-
-1. **Name** — the label displayed in the list.
-2. **Pattern** — a regular expression or another supported pattern expression.
-3. **Direction** — **Input** for user requests or **Output** for model responses.
-4. **Enable** — activates the rule immediately after creation.
-5. **Save** — creates the pattern. The **×** button closes the form without saving.
-
-Test the expression on representative data before enabling it. An overly broad pattern can cause false positives.
-
-![Add new pattern form](../../../../../assets/img/policies-add-pattern-4-3.webp)
+![Editing and testing a custom policy](../../../../../assets/img/en/policies-custom-edit-test-4-4.webp)
 
 ## Verify the result
 
-After saving the settings, send a test request through the connected application. To inspect triggers, open the record in **Session Analytics**, then use the **Censors**, **Data cleaning**, or **Validation configuration** tabs. With a synchronous protected integration, a detected violation can also block the request.
+After saving the settings, send a test request through the connected application. To inspect triggers, open the record in **Session Analytics**, then use the **Censors** or **Validation configuration** tabs. With a synchronous protected integration, a detected violation can also block the request.

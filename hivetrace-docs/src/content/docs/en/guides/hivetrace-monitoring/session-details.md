@@ -6,7 +6,7 @@ sidebar:
 
 Open session details by clicking a record ID in the **Session analytics** table. The page preserves how HiveTrace processed the message and helps you determine which checks fired and why the request was allowed or blocked.
 
-![Blocked session details overview](../../../../../assets/img/session-detail-overview-4-3.webp)
+![Blocked session details overview](../../../../../assets/img/en/session-details-overview-4-4.webp)
 
 The page header contains:
 
@@ -15,7 +15,9 @@ The page header contains:
 - a **Request blocked** banner when processing was stopped;
 - the blocking reasons and enforcement layer, such as `gateway` or `claude_code_hook`.
 
-A detected violation does not always mean that a request was blocked. The decision depends on the integration method, operating mode, and application settings active at processing time.
+The page contains the `Back to session list` link that leads to the **Session Analytics** section.
+
+A detected violation does not always mean that a request was blocked. The decision depends on the integration type, operating mode, and application settings active at processing time.
 
 ## Overview
 
@@ -34,7 +36,7 @@ An unavailable or unspecified value is shown as a dash. Use the tabs below the s
 
 The **Tool calls** tab covers tool-based workflows, including Claude Code Hooks. It shows each tool name, processing status, and call time.
 
-![Tool calls with a blocked call expanded](../../../../../assets/img/session-detail-tool-calls-4-3.webp)
+![Tool calls with a blocked call expanded](../../../../../assets/img/en/session-details-tool-calls-4-4.webp)
 
 Statuses distinguish completed operations from blocked ones. Click a call card or its right-hand chevron to expand it. A blocked operation displays its reason and input arguments; in the example, DataClean stopped an `Edit` call. Other cards can be expanded and collapsed in the same way.
 
@@ -42,7 +44,7 @@ Statuses distinguish completed operations from blocked ones. Click a call card o
 
 The **Files** tab lists attachments associated with the record and their validation results.
 
-![File card with detected DataClean entities](../../../../../assets/img/session-detail-files-4-3.webp)
+![File card with detected DataClean entities](../../../../../assets/img/en/session-details-files-4-4.webp)
 
 Each card shows the file name, size, date, extension, and detected entity types with match counts. Actions appear on the right:
 
@@ -50,7 +52,7 @@ Each card shows the file name, size, date, extension, and detected entity types 
 - the download icon saves the original file;
 - **×** closes the preview dialog.
 
-![Text file preview](../../../../../assets/img/session-detail-file-preview-4-3.webp)
+![Text file preview](../../../../../assets/img/en/session-details-file-preview-4-4.webp)
 
 Preview lets you inspect the context of detected entities without downloading the file. Because content can contain personal or other sensitive data, open it only when you have the required access. Use download when the browser cannot preview the format.
 
@@ -58,7 +60,7 @@ Preview lets you inspect the context of detected entities without downloading th
 
 The **Data cleansing** tab explains how personal data in the message was processed.
 
-![Data cleansing result and detected-pattern table](../../../../../assets/img/session-detail-dataclean-4-3.webp)
+![Data cleansing result and detected-pattern table](../../../../../assets/img/en/session-details-data-cleansing-4-4.webp)
 
 The tab shows:
 
@@ -74,7 +76,7 @@ Compare this tab with **Validation configuration**: Data cleansing shows the eff
 
 The **Censors** tab combines Safety Policy and Custom Policy results.
 
-![Safety Policy and custom censor results](../../../../../assets/img/session-detail-censors-4-3.webp)
+![Safety Policy and custom censor results](../../../../../assets/img/en/session-details-censors-4-4.webp)
 
 The **Safety Policies** card indicates whether built-in threats such as prompt injection or jailbreak were detected. **Custom Policies** reports message and file results separately and identifies the validation method, such as model classifier or blacklist. **Clean** and **Detected** badges reveal which censor caused the violation.
 
@@ -82,7 +84,7 @@ The **Safety Policies** card indicates whether built-in threats such as prompt i
 
 The **Validation configuration** tab is a snapshot of the settings used to process this record. Editing current application settings does not rewrite information for an earlier session.
 
-![Validation configuration applied to the record](../../../../../assets/img/session-detail-validation-config-4-3.webp)
+![Validation configuration applied to the record](../../../../../assets/img/en/session-details-validation-config-4-4.webp)
 
 The section starts with the configuration source, such as **Web interface**, and then lists module-specific values:
 

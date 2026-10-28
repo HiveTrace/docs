@@ -6,7 +6,7 @@ sidebar:
 
 The **Service status** page shows overall platform availability, individual components, and their dependencies. Administrators open it from the profile menu and use it for initial diagnosis.
 
-![Platform summary and first service cards](../../../../../assets/img/service-status-summary-4-3.webp)
+![Platform summary and first service cards](../../../../../assets/img/en/service-status-summary-4-4.webp)
 
 ## Platform summary
 
@@ -25,7 +25,7 @@ Each card contains:
 - error text when a check fails;
 - **Dependencies** — nested components and their individual states.
 
-![Operational services and dependencies](../../../../../assets/img/service-status-dependencies-4-3.webp)
+![Operational services and dependencies](../../../../../assets/img/en/service-status-dependencies-4-4.webp)
 
 A dependency appears inside its parent service card with its own name, type, latency, and state. This helps distinguish a failure in the service itself from a problem in a downstream model or component.
 
@@ -37,7 +37,7 @@ A dependency appears inside its parent service card with its own name, type, lat
 - **Disabled** — the component is disabled by configuration and is not treated as an incident;
 - **Unknown** — monitoring has not obtained a definitive result yet.
 
-![Unavailable service, error, and unknown dependencies](../../../../../assets/img/service-status-error-4-3.webp)
+![Unavailable service, error, and unknown dependencies](../../../../../assets/img/en/service-status-error-4-4.webp)
 
 For example, `HTTP 503` means the checked service could not process the request at that time. **Unknown** does not prove that a dependency failed; it means monitoring could not obtain a conclusive result.
 
