@@ -17,4 +17,4 @@ Authorization: Bearer <API_TOKEN>
 
 API tokens are generated and managed via the HiveTrace Web UI.
 
-In HiveTrace 4.3, each API token is scoped to one application. The request `application_id` must match the application selected when the token was created.
+In HiveTrace 4.4, each API token is scoped to one application. The request `application_id` must match the application selected when the token was created.

@@ -22,7 +22,7 @@ Override endpoints allow validation behavior to be defined inline, bypassing Web
 
 - Web UI validation settings are **not applied**
 - Validation is fully controlled via `validation_config`
-- The corresponding services (**dataclean, guardrails, custom**) must still be enabled at the deployment level
+- The corresponding services (**dataclean, guardrails, custom, language check**) must still be enabled at the deployment level
 
 ---
 
@@ -43,6 +43,8 @@ Override endpoints allow validation behavior to be defined inline, bypassing Web
 | Field                   | Type     | Description                             |
 | ----------------------- | -------- | --------------------------------------- |
 | `additional_parameters` | `object` | Metadata for session and user tracking. |
+
+> **Note:** pseudonymization and depseudonymization require `additional_parameters.session_id`.
 
 ---
 
@@ -75,14 +77,20 @@ Defines validation rules directly inside the request.
 			},
 			"dataclean": {
 				"enabled": true,
-				"clean_type": "masking",
-				"patterns": ["CVC", { "name": "AUTOMOBILE", "regex": "\\bcar\\b" }]
+				"clean_type": "pseudonymization",
+				"patterns": [
+					"CVC", 
+					{ 
+						"name": "AUTOMOBILE", 
+						"regex": "\\bcar\\b", 
+						"pseudonym": "car"
+					}
+				]
 			}
 		}
 	}
 }
 ```
-
 ---
 
 ### `dataclean.patterns`: allowed values
@@ -92,42 +100,83 @@ Defines validation rules directly inside the request.
 - a string with a predefined pattern name
 - an object with a custom pattern `{ "name": "...", "regex": "..." }`
 
+> **Note:** If pseudonymization is selected as the processing type, `pseudonym` must be passed for objects with a custom pattern.
+
 Allowed values for **predefined** patterns:
 
 | Pattern            | Description                          |
 | ------------------ | ------------------------------------ |
 | `ADDRESS`          | Address                              |
+| `BANK_ACCOUNT_NUMBER` | Bank account number               |
 | `BANK_CARD_NUMBER` | Bank card number                     |
-| `COMPANY`          | Company / organization               |
+| `BIC`              | BIC                                  |
+| `CORRESPONDENT_ACCOUNT` | Correspondent account           |
 | `CVC`              | Card CVC/CVV                         |
-| `DATE`             | Date                                 |
-| `DEADLINE_DATE`    | Deadline date                        |
-| `DIAGNOSIS`        | Diagnosis                            |
 | `DOMAIN`           | Domain                               |
-| `DURATION`         | Duration                             |
-| `EMAILS`           | Email addresses                      |
+| `DRIVER_LICENSE`   | Driver's license number              |
+| `EMAIL`            | Email addresses                      |
 | `INN`              | INN (taxpayer identification number) |
 | `IP`               | IP address                           |
-| `JOB_ROLE`         | Job role / position                  |
 | `KPP`              | KPP                                  |
-| `MONEY`            | Money amounts                        |
+| `LICENSE_PLATE`    | Vehicle registration plate           |
 | `NAME`             | Person name                          |
 | `OGRN`             | OGRN                                 |
 | `OGRNIP`           | OGRNIP                               |
 | `PASSPORT_NUMBER`  | Passport number                      |
 | `PHONE_NUMBER`     | Phone number                         |
 | `SNILS`            | SNILS                                |
+| `TOKEN`            | Access token                         |
+| `URL`              | URL                                  |
+| `VIN`              | Vehicle identification number        |
 
 ---
 
-### `dataclean.clean_type` (masking type): allowed values
+### `dataclean.whitelist`: exceptions
 
-| Masking type | Description                                           |
-| ------------ | ----------------------------------------------------- |
-| `MASKING`    | Masking: replaces matches with a mask                 |
-| `DELETION`   | Deletion: removes matches from the text               |
-| `DETECTION`  | Detection: detects matches without modifying the text |
+`patterns` — exceptions for the personal data cleaning module. They should be applied when a string resembles sensitive data but is valid in your workflow.
 
+Each item should be an object with a custom pattern `{ "name": "...", "value": "..." }`
+
+---
+
+### `dataclean.clean_type` (processing type): allowed values
+
+| Processing type    | Description                                           |
+| -------------------| ----------------------------------------------------- |
+| `MASKING`          | Masking: replaces matches with a mask                 |
+| `DELETION`         | Deletion: removes matches from the text               |
+| `DETECTION`        | Detection: detects matches without modifying the text |
+| `PSEUDONYMIZATION` | Pseudonymization: replaces matches with a stable label such as `NAME_1`|
+
+---
+
+### `dataclean.enable_depseudonymization`: depseudonymization
+
+Data can be depseudonymized within a session.
+
+```json
+{
+    "application_id": "{{application_id}}",
+    "message": "My KPP is 771301001. KPP_1",
+    "additional_parameters": {
+		"session_id": "{{client_session_id}}",
+		"user_id": "{{client_user_id}}"
+	},
+    "validation_config": {
+        "source": "inline",
+        "inline": {
+            "dataclean": {
+                "enabled": true,
+                "clean_type": "pseudonymization",
+                "patterns": [
+                    "KPP"
+                ],
+                "enable_depseudonymization": true
+            }
+        }
+    }
+}
+```
 ---
 
 ## Response Schema
