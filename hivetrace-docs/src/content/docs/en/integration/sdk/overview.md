@@ -19,5 +19,5 @@ Base clients read `HIVETRACE_URL` and `HIVETRACE_ACCESS_TOKEN`; pass `applicatio
 
 ## Where to start
 
-- For single-model apps, see [**Single LLM**](./single-llm-applications/)
+- For single-model apps, see [**Single LLM**](./single-llm-applications.md)
 This documentation is verified against `origin/main` of `HiveTrace/hivetrace-sdk`, commit `37a846c`.

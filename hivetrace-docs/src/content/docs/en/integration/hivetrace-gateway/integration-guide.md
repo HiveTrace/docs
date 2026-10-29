@@ -4,7 +4,7 @@ sidebar:
   order: 1
 ---
 
-**Document version:** for gateway 4.1.0
+**Document version:** for gateway 4.4.0
 
 **Audience:** engineering and platform teams integrating HiveTrace Gateway into a production environment.
 
