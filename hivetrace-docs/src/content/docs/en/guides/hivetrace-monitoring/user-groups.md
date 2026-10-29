@@ -1,7 +1,7 @@
 ---
 title: "User groups"
 sidebar:
-  order: 8
+  order: 10
 ---
 
 The **User groups** section shows the groups added to the application and helps you navigate to the group members.
@@ -74,3 +74,20 @@ Available actions:
 2. Open **Customize Columns** to choose the displayed columns.
 3. At the bottom of the table, select the number of rows per page or navigate to another page.
 4. Click the blue clickable link to navigate to the user's page.
+
+## Access to the page
+
+To edit an application in the header, the following permissions are required:
+
+- Area **Applications** — access level of at least `Edit`.
+
+To delete an application in the header, the following permissions are required:
+
+- Area **Applications** — `Full` access level.
+
+To view the user groups page and open a user group, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **End users** — access level of at least `Read`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

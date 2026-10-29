@@ -1,7 +1,7 @@
 ---
 title: "System users"
 sidebar:
-  order: 15
+  order: 18
 ---
 
 Use **System users** to manage employee accounts that can sign in to the HiveTrace administration console. Open it from the user-with-plus icon in the left navigation.
@@ -74,3 +74,29 @@ An active assignment can be revoked. Revoking removes the role assignment from t
 - Use application groups for teams that work with the same set of applications.
 - Verify the system user's permissions after changing roles.
 - Revoke assignments if the system user should not have access.
+
+## Access to the page
+
+To view the system users table, the following permissions are required:
+
+- Area **System users** — access level of at least `Read`.
+
+To create system users, activate or deactivate them, the following permissions are required:
+
+- Area **System users** — access level of at least `Edit`.
+
+To delete system users, the following permissions are required:
+
+- Area **System users** — `Full` access level.
+
+To view the active assignments of system users, the following permissions are required:
+
+- Area **System users** — access level of at least `Read`;
+- Area **Roles and assignments** — access level of at least `Read`.
+
+To assign roles to system users and revoke them, the following permissions are required:
+
+- Area **System users** — access level of at least `Read`;
+- Area **Roles and assignments** — `Full` access level.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

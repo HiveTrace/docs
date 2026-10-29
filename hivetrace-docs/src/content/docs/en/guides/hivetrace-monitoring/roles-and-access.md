@@ -1,7 +1,7 @@
 ---
 title: "Roles and Access"
 sidebar:
-  order: 3
+  order: 19
 ---
 
 The **Roles and access** section is used to manage roles, application groups, and view system users' permissions. The section contains several tabs and screens. It is better to understand the tabs, and then perform specific configurations.
@@ -178,3 +178,30 @@ The table displays the following data:
 - `Received through` - the source of the permission: the role, the assignment scope, and the grant date. This column helps understand how the system user has received a particular permission.
 
 ![Application Rights Table](../../../../../assets/img/en/effective-application-rights-table-4-4.webp)
+
+## Access to the page
+
+To view roles and their assignments, the following permissions are required:
+
+- Area **Roles and assignments** — access level of at least `Read`.
+
+To edit, duplicate, and delete roles, the following permissions are required:
+
+- Area **Roles and assignments** — `Full` access level.
+
+To view application groups, the following permissions are required:
+
+- Area **Roles and assignments** — access level of at least `Read`;
+- Area **Application groups** — access level of at least `Read`.
+
+To create application groups, add applications to groups, and remove applications from groups, the following permissions are required:
+
+- Area **Roles and assignments** — access level of at least `Read`;
+- Area **Application groups** — `Full` access level.
+
+To view system user assignments, the following permissions are required:
+
+- Area **Roles and assignments** — access level of at least `Read`;
+- Area **System users** — access level of at least `Read`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

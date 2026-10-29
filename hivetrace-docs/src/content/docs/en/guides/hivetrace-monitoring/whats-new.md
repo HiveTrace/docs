@@ -1,7 +1,7 @@
 ---
 title: "What's new"
 sidebar:
-  order: 18
+  order: 25
 ---
 
 The **What's new?** page shows the installed HiveTrace version, component versions, and release history. Open it from the profile menu.

@@ -1,7 +1,7 @@
 ---
 title: "Service status"
 sidebar:
-  order: 12
+  order: 21
 ---
 
 The **Service status** page shows overall platform availability, individual components, and their dependencies. Administrators open it from the profile menu and use it for initial diagnosis.
@@ -47,3 +47,11 @@ For example, `HTTP 503` means the checked service could not process the request 
 2. Inspect the affected service's dependencies and locate the lowest failing component.
 3. Record the error text and check time.
 4. Continue the investigation in that service's logs and metrics. This page does not provide restart or configuration controls.
+
+## Access to the page
+
+To view service statuses, the following permissions are required:
+
+- Area **Platform** — access level of at least `Read`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

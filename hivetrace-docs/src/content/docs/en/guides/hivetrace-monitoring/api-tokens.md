@@ -1,7 +1,7 @@
 ---
 title: "API Tokens"
 sidebar:
-  order: 8
+  order: 14
 ---
 
 API tokens authorize SDK and direct API integrations. A token value is displayed only once after creation.
@@ -53,3 +53,20 @@ Deletion immediately revokes integration access. Move the application to a repla
 ## Security
 
 Send the token as `Authorization: Bearer <token>`. Never place it in browser code, source control, logs, or documentation examples. Use separate short-lived tokens per application and environment, rotate them, and revoke unused credentials.
+
+## Access to the page
+
+To view the API tokens table, the following permissions are required:
+
+- Area **API tokens and integrations** — access level of at least `Read`.
+
+To add a new API token, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **API tokens and integrations** — access level of at least `Edit`.
+
+To delete an API token, the following permissions are required:
+
+- Area **API tokens and integrations** — `Full` access level.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

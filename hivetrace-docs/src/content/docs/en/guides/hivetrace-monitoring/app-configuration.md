@@ -1,10 +1,10 @@
 ---
-title: "Platform settings"
+title: "App Configuration"
 sidebar:
-  order: 17
+  order: 23
 ---
 
-**Platform settings** contains instance-wide HiveTrace options. To open it, select the profile icon in the upper-right corner and choose **Platform settings**.
+**App Configuration** contains instance-wide HiveTrace options. To open it, select the profile icon in the upper-right corner and choose **App Configuration**.
 
 ![Profile menu with the Platform settings link](../../../../../assets/img/en/platform-profile-menu-4-4.webp)
 
@@ -15,3 +15,13 @@ System users can review and change the settings available for the current HiveTr
 ![Platform settings page](../../../../../assets/img/en/platform-settings-4-4.webp)
 
 Before saving, verify that the changes match your deployment configuration and organizational policies.
+
+## Access to the page
+
+To view application configurations, the following permissions are required:
+
+- Area **Platform** — access level of at least `Read`;
+
+To edit application configurations, the following permissions are required:
+
+- Area **Platform** — access level of at least `Edit`.

@@ -1,7 +1,7 @@
 ---
 title: "Billing"
 sidebar:
-  order: 11
+  order: 20
 ---
 
 The **Billing** section shows LLM load in requests and tokens. Use it to identify which application, model, or user produces most of the traffic.
@@ -93,3 +93,16 @@ All three tables use the same **Requests**, **Input tokens**, and **Output token
 5. Use the application, model, and user tables to locate the source of the load.
 
 An empty table means that no data matches the current conditions. Version 4.4 reports usage but does not calculate monetary cost or provide an export action.
+
+## Access to the page
+
+To view the **Billing** page, the following permissions are required:
+
+- Area **Analytics** — access level of at least `Read`.
+
+To filter by application, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Analytics** — access level of at least `Read`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

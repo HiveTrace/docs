@@ -78,3 +78,27 @@ Use these observability methods for a client library or direct HiveTrace API cal
 This method validates Claude Code actions, including tool calls. Synchronous mode displays DataClean, Custom Policy, Guardrail, and Language Mismatch switches. The blocking-response and token-limit fields are not displayed for Claude Code Hooks.
 
 ![Integration: Claude Code Hooks settings](../../../../../assets/img/en/integration-create-claude-hooks-settings-4-4.webp)
+
+## Access to the page
+
+To edit an application in the header, the following permissions are required:
+
+- Area **Applications** — access level of at least `Edit`.
+
+To delete an application in the header, the following permissions are required:
+
+- Area **Applications** — `Full` access level.
+
+To view the **Integration** page, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`.
+
+To update the application settings and edit it, the following permissions are required:
+
+- Area **Applications** — access level of at least `Edit`.
+
+To delete an application, the following permissions are required:
+
+- Area **Applications** — `Full` access level.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

@@ -59,3 +59,13 @@ The user's sessions can be viewed via the **⋮** menu.
 5. Open the full alert log or session analytics for investigation.
 
 Values in the screenshots are example dev-environment data and are not recommended thresholds.
+
+## Access to the page
+
+To view summary metrics and charts, the following permissions are required:
+
+- Area **Analytics** — access level of at least `Read`.
+
+To view latest alerts and navigate to the **Alerts** page, the following permissions are required:
+
+- Area **Sessions and messages** — access level of at least `Read`.

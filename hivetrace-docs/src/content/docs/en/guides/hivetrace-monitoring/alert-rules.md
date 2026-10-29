@@ -1,7 +1,7 @@
 ---
 title: "Alert rules"
 sidebar:
-  order: 7
+  order: 12
 ---
 
 The **Alert Rules** section defines how, when, and under what conditions notifications about violations are sent. Settings are configured separately for each violation type.
@@ -145,5 +145,26 @@ By default, all blocks are expanded. If a block is collapsed, a brief summary is
 When changes are made on the page, the panel with action buttons appears:
 
 - **Cancel** — discards the changes and reverts the page to the previous saved state;
-
 - **Save** — saves the changes.
+
+## Access to the page
+
+To edit an application in the header, the following permissions are required:
+
+- Area **Applications** — access level of at least `Edit`.
+
+To delete an application in the header, the following permissions are required:
+
+- Area **Applications** — `Full` access level.
+
+To view the **Alert rules** page, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Application policies** — access level of at least `Read`.
+
+To configure notifications about violations and token usage, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Application policies** — access level of at least `Edit`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

@@ -1,7 +1,7 @@
 ---
 title: "Users"
 sidebar:
-  order: 8
+  order: 9
 ---
 
 The **Users** section lists the end users of the selected AI application and provides access to their related sessions and files.
@@ -265,3 +265,25 @@ Available actions:
 5. Click the file name to open the file preview.
 
 > **Important:** file content processing depends on the global **Custom file processing** setting and the selected application configuration. If processing is disabled, a file appearing on this tab does not by itself mean that its contents were checked by policies or Dataclean.
+
+## Access to the page
+
+To edit an application in the header, the following permissions are required:
+
+- Area **Applications** — access level of at least `Edit`.
+
+To delete an application in the header, the following permissions are required:
+
+- Area **Applications** — `Full` access level.
+
+To view application users, as well as their related sessions and files, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **End users** — access level of at least `Read`;
+- Area **Sessions and messages** — access level of at least `Read`.
+
+Additionally, to preview and download files, the following is required:
+
+- Enable the **Download analysis files** granular permission.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

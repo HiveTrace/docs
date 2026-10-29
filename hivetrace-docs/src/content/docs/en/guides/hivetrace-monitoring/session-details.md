@@ -1,7 +1,7 @@
 ---
 title: "Session details"
 sidebar:
-  order: 10
+  order: 17
 ---
 
 Open session details by clicking a record ID in the **Session analytics** table. The page preserves how HiveTrace processed the message and helps you determine which checks fired and why the request was allowed or blocked.
@@ -95,3 +95,21 @@ The section starts with the configuration source, such as **Web interface**, and
 - DataClean patterns.
 
 Use the copy icon next to a pattern to place its value on the clipboard. During an investigation, compare this snapshot with the effective results in **Data cleansing** and **Censors**.
+
+## Access to the page
+
+To view the session details page, the following permissions are required:
+
+- Area **Sessions and messages** — access level of at least `Read`.
+
+To view message content inside sessions, the following permissions are required::
+
+- Area **Sessions and messages** — access level of at least `Read`;
+- Enable the **Read session content** granular permission.
+
+To preview and download attached files, the following permissions are required:
+
+- Area **Sessions and messages** — access level of at least `Read`;
+- Enable the **Download analysis files** granular permission.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

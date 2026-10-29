@@ -1,7 +1,7 @@
 ---
 title: "Communication channels"
 sidebar:
-  order: 7
+  order: 11
 ---
 
 On the **Communication channels** section, you can review existing notification channels and add new ones. Currently, two delivery methods are supported: **Email** and **Telegram**.
@@ -63,6 +63,33 @@ Fields marked with an asterisk are required. After adding, the configuration app
 
 ![Creating a Telegram configuration](../../../../../assets/img/en/alert-config-create-telegram-4-4.webp)
 
-Properly configured alerts enable faster incident response, improve operational visibility, and help maintain a strong security posture for AI applications.
+Properly configured alerts enable faster incident response, improve operational visibility, and help maintain a strong security posture for AI applications. Do not publish the Telegram bot token or share it in open channels. If the token has been exposed, generate a new one and update the configuration.
 
 > **Important:** SIEM integration is configured during platform deployment by your DevOps engineer or a HiveTrace specialist. The supported log forwarding format is **Syslog**.
+
+## Access to the page
+
+To edit an application in the header, the following permissions are required:
+
+- Area **Applications** — access level of at least `Edit`.
+
+To delete an application in the header, the following permissions are required:
+
+- Area **Applications** — `Full` access level.
+
+To view the notification channels page, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Application policies** — access level of at least `Read`.
+
+To add a new channel or edit an existing one, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Application policies** — access level of at least `Edit`.
+
+To delete a channel, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Application policies** — `Full` access level.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

@@ -1,7 +1,7 @@
 ---
 title: "Session analytics"
 sidebar:
-  order: 9
+  order: 16
 ---
 
 **Session analytics** is a workspace for investigating requests, model responses, violations, files, and tool calls. Header counters show all records and records with violations; `live` indicates streaming updates.
@@ -90,3 +90,27 @@ Record **ID** links to details. **Session** is the client session identifier. **
 **Message** is a shortened request or response. **Agents · Tools** shows related tool-call count. **Files** displays the number of files attached to the session. **Violation** identifies the triggered check. **Direction** is `in` or `out`. **Date** uses local date and time. Scroll horizontally to reveal columns that do not fit.
 
 Select a record ID to open [Session details](./session-details.md).
+
+## Access to the page
+
+To view and filter sessions, the following permissions are required:
+
+- Area **Sessions and messages** — access level of at least `Read`.
+
+To filter sessions by application, the following permissions are required:
+
+- Area **Sessions and messages** — access level of at least `Read`;
+- Area **Applications** — access level of at least `Read`.
+
+To filter sessions by user groups, the following permissions are required:
+
+- Area **Sessions and messages** — access level of at least `Read`;
+- Area **Applications** — access level of at least `Read`;
+- Area **End users** — access level of at least `Read`.
+
+To export sessions, the following permissions are required:
+
+- Area **Sessions and messages** — access level of at least `Read`;
+- Enable the **Export sessions** granular permission.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

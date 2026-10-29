@@ -2,7 +2,7 @@
 title: "Policies"
 description: "Configure HiveTrace Guardrail and custom policies."
 sidebar:
-  order: 4
+  order: 5
 ---
 
 Policies are configured separately for each application. They let you enable the built-in HiveTrace protection, and create custom rules for user requests.
@@ -92,3 +92,36 @@ Test both prohibited and acceptable wording. Select **Save** when finished; **Ca
 ## Verify the result
 
 After saving the settings, send a test request through the connected application. To inspect triggers, open the record in **Session Analytics**, then use the **Censors** or **Validation configuration** tabs. With a synchronous protected integration, a detected violation can also block the request.
+
+## Access to the page
+
+To edit an application in the header, the following permissions are required:
+
+- Area **Applications** — access level of at least `Edit`.
+
+To delete an application in the header, the following permissions are required:
+
+- Area **Applications** — `Full` access level.
+
+To view the Guardrail and custom policy settings, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Application policies** — access level of at least `Read`.
+
+To edit the Guardrail and custom policy settings, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Application policies** — access level of at least `Edit`.
+
+To delete a custom policy, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Application policies** — `Full` access level.
+
+To update the application profile, the following permissions are required:
+
+- Area **Applications** — access level of at least `Edit`;
+- Area **Application policies** — access level of at least `Edit`;
+- Area **Protection profiles** — access level of at least `Read`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.

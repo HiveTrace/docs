@@ -1,7 +1,7 @@
 ---
 title: "Profiles"
 sidebar:
-  order: 3
+  order: 13
 ---
 
 The **Profiles** section allows you to configure protection once and apply it to multiple applications — without configuring each application separately.
@@ -276,3 +276,22 @@ When changes are made to the profile, an information panel appears at the bottom
 - **Counter and sections** — information about unsaved sections.
 - **Reset** — discards all unsaved changes.
 - **Save settings** — saves the changes.
+
+## Access to the page
+
+To view profiles, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Protection profiles** — access level of at least `Read`.
+
+To create a new profile and edit the existing one, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Protection profiles** — access level of at least `Edit`.
+
+To delete profiles, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **Protection profiles** — `Full` access level.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
