@@ -56,12 +56,11 @@ Available actions:
 
 ## Automatic user creation
 
-A user is automatically created if a new external user ID is passed in a HiveTrace request:
+A user is automatically created in two cases:
 
-- in additional parameters when using the API or SDK;
-- in HTTP headers when using a proxy.
+- when a new external user ID is passed in a HiveTrace request — either in additional parameters (API or SDK) or in HTTP headers (when using a proxy). An automatically created record may contain only the **Client ID**. Add the full name through the interface if needed.
 
-An automatically created record may contain only the **Client ID**. Add the full name through the interface if needed.
+- during directory synchronization with an external source — if a new user identifier is passed in the request. If the `users.fio` field is specified, the user is created with this name, which is displayed in the application's user table.
 
 ## User Sessions
 
@@ -276,14 +275,32 @@ To delete an application in the header, the following permissions are required:
 
 - Area **Applications** — `Full` access level.
 
-To view application users, as well as their related sessions and files, the following permissions are required:
+To view application users, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **End users** — access level of at least `Read`.
+
+To create application users, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **End users** — access level of at least `Edit`.
+
+To delete application users, the following permissions are required:
+
+- Area **Applications** — access level of at least `Read`;
+- Area **End users** — access level of at least `Read`;
+- Enable the **Delete end users** granular permission.
+
+To view user sessions and files, the following permissions are required:
 
 - Area **Applications** — access level of at least `Read`;
 - Area **End users** — access level of at least `Read`;
 - Area **Sessions and messages** — access level of at least `Read`.
 
-Additionally, to preview and download files, the following is required:
+To preview and download files, the following permissions are required:
 
+- Area **Applications** — access level of at least `Read`;
+- Area **End users** — access level of at least `Read`;
 - Enable the **Download analysis files** granular permission.
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.

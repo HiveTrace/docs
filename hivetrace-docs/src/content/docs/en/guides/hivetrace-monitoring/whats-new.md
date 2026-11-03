@@ -14,6 +14,6 @@ Each component card shows the module name, version, and update date. Component v
 
 ## Release history
 
-![Release card and key changes](../../../../../assets/img/en/whats-new-history-4-4.webp
+![Release card and key changes](../../../../../assets/img/en/whats-new-history-4-4.webp)
 
 Select a release header or its chevron to expand or collapse it. A card can contain a summary, affected module, critical-change flag, detailed behavior, and deployment recommendations. Review critical changes and recommendations before upgrading because they may require a new service, environment variable, or configuration change.

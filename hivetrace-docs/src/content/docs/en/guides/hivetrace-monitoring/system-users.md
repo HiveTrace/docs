@@ -55,6 +55,8 @@ After the user is added successfully, the account appears in the table. Access t
 
 After saving, the system user receives the permissions within the selected scope. If the assignment is successfully granted, the interface displays the `Assignment granted` notification. If the system user is already signed in, they may need to refresh the page.
 
+Having a permission does not automatically grant a user access to a specific application. The permission must apply to that application — it must be part of an assignment whose scope includes the application.
+
 ## Viewing the system user's active assignments
 
 1. Find the account in the system users table.
@@ -64,6 +66,8 @@ After saving, the system user receives the permissions within the selected scope
 ![Viewing the system user's active assignments](../../../../../assets/img/en/system-user-active-assignments-4-4.webp)
 
 The table shows which roles have already been granted to the system user, where they apply, who granted the assignment, and when it was granted. If there are no assignments, `No results` is displayed.
+
+The user can have multiple assignments. Permissions from different assignments are combined: the absence of access in one role does not cancel a permission granted by another. The user's effective permissions are determined by all their active assignments and their scopes.
 
 An active assignment can be revoked. Revoking removes the role assignment from the system user. After revocation, permissions granted only through this assignment no longer apply.
 

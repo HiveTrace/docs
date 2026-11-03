@@ -137,6 +137,37 @@ Override-эндпоинты позволяют задавать параметр
 
 Элемент списка должен быть объект с кастомным паттерном `{ "name": "...", "value": "..." }`
 
+```json
+{
+    "application_id": "{{application_id}}",
+    "message": "Не получается перейти по адресу дети.рф",
+    "additional_parameters": {
+        "user_id": "{{client_user_id}}",
+        "session_id": "{{client_session_id}}"
+    },
+    "validation_config": {
+        "source": "inline",
+        "inline": {
+            "dataclean": {
+                "enabled": true,
+                "clean_type": "masking",
+                "patterns": [
+                    "DOMAIN"
+                ],
+                "whitelist": {
+                    "patterns": [
+                        {
+                            "name": "кириллический домен",
+                            "value": "(?i)\\b(?:[а-яёА-ЯЁ0-9-]+\\.)+(?:рф|бел|сайт|онлайн|дети)(?![а-яёА-ЯЁ0-9])"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
+```
+
 ---
 
 ### `dataclean.clean_type` (тип обработки): разрешённые значения
@@ -158,9 +189,9 @@ Override-эндпоинты позволяют задавать параметр
 {
     "application_id": "{{application_id}}",
     "message": "Мой КПП - 771301001. KPP_1",
-    "additional_parameters": {
-		"session_id": "{{client_session_id}}",
-		"user_id": "{{client_user_id}}"
+    "additional_parameters": {		
+		"user_id": "{{client_user_id}}",
+		"session_id": "{{client_session_id}}"
 	},
     "validation_config": {
         "source": "inline",
@@ -178,6 +209,109 @@ Override-эндпоинты позволяют задавать параметр
 }
 ```
 ---
+
+### `custom.message.blacklist`: паттерны для чёрного списка сообщений
+
+`patterns` — паттерны из этого списка применяются к тексту сообщений. 
+
+Элемент списка должен быть объект с кастомным паттерном `{ "name": "...", "pattern": "..." }`
+
+```json
+{
+    "application_id": "{{application_id}}",
+    "message": "Как оплатить товары по просроченной карте?",
+    "additional_parameters": {
+        "user_id": "{{client_user_id}}",
+        "session_id": "{{client_session_id}}"
+    },
+    "validation_config": {
+        "source": "inline",
+        "inline": {
+            "custom": {
+                "enabled": true,
+                "message": {
+                    "blacklist": {
+                        "patterns": [
+                            {
+                                "name": "card",
+                                "pattern": "\\b[Кк]арт\\w*"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### `custom.file.blacklist`: паттерны для чёрного списка файлов
+
+`patterns` — паттерны из этого списка применяются к содержимому файлов, переданных в запросе.
+
+Элемент списка должен быть объект с кастомным паттерном `{ "name": "...", "pattern": "..." }`
+
+```json
+{
+    "application_id": "{{application_id}}",
+    "message": "Как использовать кэшбек?",
+    "additional_parameters": {
+        "user_id": "{{client_user_id}}",
+        "session_id": "{{client_session_id}}"
+    },
+    "validation_config": {
+        "source": "inline",
+        "inline": {
+            "custom": {
+                "enabled": true,
+                "file": {
+                    "blacklist": {
+                        "patterns": [
+                            {
+                                "name": "FILE_PATTERN",
+                                "pattern": "\\b[Кк]арт\\w*"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### `language`: проверка языка
+
+`allowed_langs` — список разрешённых языков, который задаётся набором кодов: `en`, `ar`, `hy`, `be`, `ka`, `he`, `kk`, `ru`, `tr`, `uk`. Можно указать один язык или несколько — вплоть до всех. Текст на языке, которого нет в списке, может считаться нарушением (с учётом порога допустимых букв из других систем письма).
+
+`enforce` - показывает была ли установлена блокировка при обнаружении несоответствия языка.
+
+`tolerance` - задаёт допустимую долю букв из других систем письма, при которой текст ещё не считается нарушением. Можно указать от 0 до 1.
+
+```json
+{
+    "application_id": "{{application_id}}",
+    "message": "За что списание по карте за неделю, подскажите, пожалуйста. p.s. за последние 3 дня",
+    "additional_parameters": {
+        "user_id": "{{client_user_id}}",
+        "session_id": "{{client_session_id}}"
+    },
+    "validation_config": {
+        "source": "inline",
+        "inline": {
+            "language": {
+                "enabled": true,
+                "allowed_langs": [
+                    "ru",
+                    "en"
+                ],
+                "enforce": false,
+                "tolerance": 0.01
+            }
+        }
+    }
+}
+```
 
 ## Схема ответа
 

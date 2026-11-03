@@ -92,17 +92,15 @@ Both endpoints return a JSON object.
 | `custom_policy.message.model.flagged`| `boolean`| Indicates custom policy violations.                           |
 | `custom_policy.message.blacklist.flagged`| `boolean`| Indicates message blacklist violations.                   |
 | `custom_policy.file.blacklist.flagged`| `boolean`| Indicates file blacklist violations.                         |
-| `dataclean.flagged`      | `boolean`        | Indicates sensitive data was detected in the message or in an 
-attached file.                                                                                                    |
+| `dataclean.flagged`      | `boolean`        | Indicates sensitive data was detected in the message or in an attached file. |
 | `dataclean.message.flagged`| `boolean`      | Indicates sensitive data was detected in the message.             |
 | `dataclean.message.text_modified`|`boolean` | Indicates text was modified during processing.                    |
-| `dataclean.message.cleaned_text`|`string`   | Sanitized version of the message after processing. With the 
-`Detection` processing type, the text remains unchanged.  |
+| `dataclean.message.cleaned_text`|`string`   | Sanitized version of the message after processing. With the `Detection` processing type, the text remains unchanged. |
 | `dataclean.message.types[]`| `array`   | Detected entity types with counts (may be empty).                      |
 | `dataclean.message.entities[]` | `array` | Detected entity types, their position in the original and processed text, as well as their value (may be empty).                                                                      |
 | `dataclean.file.flagged` | `boolean`         | Indicates sensitive data was detected in the attached file.      |
-| `dataclean.file.save_failed`| `boolean`      | Indicates the file was saved.                                    |
-| `dataclean.file.check_failed` | `boolean` | Indicates the file was checked.                                     |
+| `dataclean.file.save_failed`| `boolean`      | Indicates whether a file save error occurred.                    |
+| `dataclean.file.check_failed` | `boolean` | Indicates whether a file check error occurred.                      |
 | `dataclean.file.files[]` | `array` | List with detailed results for each file (may be empty).                   |
 | `language.flagged` | `boolean`         | Indicates language check violations.                                   |
 | `language.enforced`| `boolean`      | Indicates the block was set for language mismatch.                        |

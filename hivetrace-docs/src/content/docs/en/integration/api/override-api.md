@@ -137,6 +137,37 @@ Allowed values for **predefined** patterns:
 
 Each item should be an object with a custom pattern `{ "name": "...", "value": "..." }`
 
+```json
+{
+    "application_id": "{{application_id}}",
+    "message": "Unable to navigate to дети.рф",
+    "additional_parameters": {
+        "user_id": "{{client_user_id}}",
+        "session_id": "{{client_session_id}}"
+    },
+    "validation_config": {
+        "source": "inline",
+        "inline": {
+            "dataclean": {
+                "enabled": true,
+                "clean_type": "masking",
+                "patterns": [
+                    "DOMAIN"
+                ],
+                "whitelist": {
+                    "patterns": [
+                        {
+                            "name": "cyrillic domain",
+                            "value": "(?i)\\b(?:[а-яёА-ЯЁ0-9-]+\\.)+(?:рф|бел|сайт|онлайн|дети)(?![а-яёА-ЯЁ0-9])"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
+```
+
 ---
 
 ### `dataclean.clean_type` (processing type): allowed values
@@ -178,6 +209,109 @@ Data can be depseudonymized within a session.
 }
 ```
 ---
+
+### `custom.message.blacklist`: blacklist message patterns
+
+`patterns` — patterns from this list are applied to message text.
+
+Each item should be an object with a custom pattern `{ "name": "...", "pattern": "..." }`
+
+```json
+{
+    "application_id": "{{application_id}}",
+    "message": "How can I pay with an expired card?",
+    "additional_parameters": {
+        "user_id": "{{client_user_id}}",
+        "session_id": "{{client_session_id}}"
+    },
+    "validation_config": {
+        "source": "inline",
+        "inline": {
+            "custom": {
+                "enabled": true,
+                "message": {
+                    "blacklist": {
+                        "patterns": [
+                            {
+                                "name": "card",
+                                "pattern": "\\b[Cc]ard\\w*"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### `custom.file.blacklist`: blacklist file patterns
+
+`patterns` — patterns from this list are applied to the contents of files attached to a request or a response.
+
+Each item should be an object with a custom pattern `{ "name": "...", "pattern": "..." }`
+
+```json
+{
+    "application_id": "{{application_id}}",
+    "message": "How to use cashback?",
+    "additional_parameters": {
+        "user_id": "{{client_user_id}}",
+        "session_id": "{{client_session_id}}"
+    },
+    "validation_config": {
+        "source": "inline",
+        "inline": {
+            "custom": {
+                "enabled": true,
+                "file": {
+                    "blacklist": {
+                        "patterns": [
+                            {
+                                "name": "FILE_PATTERN",
+                                "pattern": "\\b[Cc]ard\\w*"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### `language`: language check
+
+`allowed_langs` — the list of allowed languages defined by a set of codes: `en`, `ar`, `hy`, `be`, `ka`, `he`, `kk`, `ru`, `tr`, `uk`. You can choose one language or several — up to all of them. Text in a language not included in the list may be flagged as a violation, depending on the threshold of permissible letters from other writing systems.
+
+`enforce` - indicates the block was set for language mismatch.
+
+`tolerance` - sets the permissible share of letters from other writing systems at which the text is not yet considered a violation. The threshold can be set from 0 to 1.
+
+```json
+{
+    "application_id": "{{application_id}}",
+    "message": "За что списание по карте за неделю, p.s. за последние 3 дня",
+    "additional_parameters": {
+        "user_id": "{{client_user_id}}",
+        "session_id": "{{client_session_id}}"
+    },
+    "validation_config": {
+        "source": "inline",
+        "inline": {
+            "language": {
+                "enabled": true,
+                "allowed_langs": [
+                    "ru",
+                    "en"
+                ],
+                "enforce": false,
+                "tolerance": 0.01
+            }
+        }
+    }
+}
+```
 
 ## Response Schema
 

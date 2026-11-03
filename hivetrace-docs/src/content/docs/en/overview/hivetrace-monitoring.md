@@ -33,7 +33,7 @@ This approach helps prevent unsafe outcomes **before they affect business proces
 
 Use the icons in the left navigation to open the main workspace areas. The additional platform menu is in the lower-left corner: click the avatar containing the current user's initial.
 
-![Profile and platform menu](../../../../assets/img/platform-profile-menu-4-3.webp)
+![Profile and platform menu](../../../../assets/img/en/platform-profile-menu-4-4.webp)
 
 The menu header shows the current user's avatar and name. The following destinations appear below it:
 
