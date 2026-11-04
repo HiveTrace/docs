@@ -128,7 +128,7 @@ curl -sS -X POST "$BASE_URL/process_request/" \
   -H "Content-Type: application/json" \
   -d '{
     "application_id":"<uuid>",
-    "message":"My name is John and my CVC is 222.",
+    "message":"Меня зовут Иван, мой CVC 222.",
     "additional_parameters":{
       "user_id":"user-123",
       "session_id":"session-456"
@@ -146,7 +146,7 @@ curl -sS -X POST "$BASE_URL/process_response/" \
   -H "Content-Type: application/json" \
   -d '{
     "application_id":"<uuid>",
-    "message":"Hello John, I have processed your request.",
+    "message":"Привет, Иван. Я обработал твой запрос",
     "additional_parameters":{
       "user_id":"user-123",
       "session_id":"session-456"

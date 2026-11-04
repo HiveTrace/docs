@@ -6,6 +6,16 @@ sidebar:
 
 The **Dashboard** opens after sign-in and summarises HiveTrace traffic. Message and token metrics update as new data arrives without requiring a page reload.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing summary metrics and charts | `Analytics` | `Read` |
+| Viewing the latest alerts | `Sessions and messages` | `Read` |
+| Navigating to the `Alerts` page | `Sessions and messages` | `Read` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## Summary metrics and charts
 
 ![Dashboard: messages, violations, and token usage](../../../../../assets/img/en/dashboard-summary-4-4.webp)
@@ -59,13 +69,3 @@ The user's sessions can be viewed via the **⋮** menu.
 5. Open the full alert log or session analytics for investigation.
 
 Values in the screenshots are example dev-environment data and are not recommended thresholds.
-
-## Access to the page
-
-To view summary metrics and charts, the following permissions are required:
-
-- Area **Analytics** — access level of at least `Read`.
-
-To view latest alerts and navigate to the **Alerts** page, the following permissions are required:
-
-- Area **Sessions and messages** — access level of at least `Read`.

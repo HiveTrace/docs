@@ -6,6 +6,28 @@ sidebar:
 
 The **Users** section lists the end users of the selected AI application and provides access to their related sessions and files.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing application users | `Applications` | `Read` |
+| | `End users` | `Read` |
+| Creating application users | `Applications` | `Read` |
+| | `End users` | `Edit` |
+| Deleting application users | `Applications` | `Read` |
+| | `End users` | `Read` |
+| | `Granular permission` | `Delete end users` |
+| Viewing user sessions and files | `Applications` | `Read` |
+| | `End users` | `Read` |
+| | `Sessions and messages` | `Read` |
+| File preview and download | `Applications` | `Read` |
+| | `End users` | `Read` |
+| | `Granular permission` | `Download analysis files` |
+| Editing an application from the header | `Applications` | `Edit` |
+| Deleting an application from the header | `Applications` | `Full` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## Opening the **Users** section
 
 1. In the sidebar, select **Applications**.
@@ -264,43 +286,3 @@ Available actions:
 5. Click the file name to open the file preview.
 
 > **Important:** file content processing depends on the global **Custom file processing** setting and the selected application configuration. If processing is disabled, a file appearing on this tab does not by itself mean that its contents were checked by policies or Dataclean.
-
-## Access to the page
-
-To edit an application in the header, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`.
-
-To delete an application in the header, the following permissions are required:
-
-- Area **Applications** — `Full` access level.
-
-To view application users, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **End users** — access level of at least `Read`.
-
-To create application users, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **End users** — access level of at least `Edit`.
-
-To delete application users, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **End users** — access level of at least `Read`;
-- Enable the **Delete end users** granular permission.
-
-To view user sessions and files, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **End users** — access level of at least `Read`;
-- Area **Sessions and messages** — access level of at least `Read`.
-
-To preview and download files, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **End users** — access level of at least `Read`;
-- Enable the **Download analysis files** granular permission.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

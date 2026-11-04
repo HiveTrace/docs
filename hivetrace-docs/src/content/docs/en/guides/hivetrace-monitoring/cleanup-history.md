@@ -6,6 +6,14 @@ sidebar:
 
 **Cleanup history** shows the outcome of background message-deletion jobs. Use it to confirm that a job has finished and to check how many user messages and LLM responses were removed.
 
+## Required permissions
+
+To view the cleanup history, the following permissions are required:
+
+- Area **Platform** — access level of at least `Read`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## Opening the page
 
 Follow the link in a cleanup notification. An administrator can also open `/cleanup-history` directly.
@@ -29,11 +37,3 @@ Follow the link in a cleanup notification. An administrator can also open `/clea
 4. If the job fails, record its start time and ask the platform administrator to inspect backend and ClickHouse logs.
 
 Cleanup history contains aggregated results and cannot restore deleted messages.
-
-## Access to the page
-
-To view the cleanup history, the following permissions are required:
-
-- Area **Platform** — access level of at least `Read`.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

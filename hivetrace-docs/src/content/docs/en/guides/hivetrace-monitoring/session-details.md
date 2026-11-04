@@ -4,7 +4,23 @@ sidebar:
   order: 17
 ---
 
-Open session details by clicking a record ID in the **Session analytics** table. The page preserves how HiveTrace processed the message and helps you determine which checks fired and why the request was allowed or blocked.
+The **Session details** page preserves how HiveTrace processed the message and helps you determine which checks fired and why the request was allowed or blocked.
+
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing the session details page | `Sessions and messages` | `Read` |
+| Viewing message content inside sessions | `Sessions and messages` | `Read` |
+| | `Granular permission` | `Read session content` |
+| Attached files preview and download | `Sessions and messages` | `Read` |
+| | `Granular permission` | `Download analysis files` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
+## Opening session details
+
+Open session details by clicking a record ID in the **Session analytics** table.
 
 ![Blocked session details overview](../../../../../assets/img/en/session-details-overview-4-4.webp)
 
@@ -95,21 +111,3 @@ The section starts with the configuration source, such as **Web interface**, and
 - DataClean patterns.
 
 Use the copy icon next to a pattern to place its value on the clipboard. During an investigation, compare this snapshot with the effective results in **Data cleansing** and **Censors**.
-
-## Access to the page
-
-To view the session details page, the following permissions are required:
-
-- Area **Sessions and messages** — access level of at least `Read`.
-
-To view message content inside sessions, the following permissions are required::
-
-- Area **Sessions and messages** — access level of at least `Read`;
-- Enable the **Read session content** granular permission.
-
-To preview and download attached files, the following permissions are required:
-
-- Area **Sessions and messages** — access level of at least `Read`;
-- Enable the **Download analysis files** granular permission.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

@@ -167,13 +167,13 @@ curl -sS -X POST "$BASE_URL/process_response/" \
         "blocked": false,
         "blocked_until": null
     },
-    "request_id": "6c769c7a-f513-47e5-836a-5d59e0587c5b",
+    "request_id": "ad1472eb-e7f5-4d5c-ad33-33a9a07ca870",
     "schema_version": "2.4.0",
     "status": "success",
     "errors": [],
     "warnings": [],
     "tokens": {
-        "count": 19,
+        "count": 8,
         "usage_severity": null
     },
     "guardrails": {
@@ -200,7 +200,7 @@ curl -sS -X POST "$BASE_URL/process_response/" \
         "message": {
             "flagged": true,
             "text_modified": true,
-            "cleaned_text": "Отпишитесь по моему балансу на XXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "cleaned_text": "Please contact me at XXXXXXXXXXXXXXXXXXXX",
             "types": [
                 {
                     "type": "EMAIL",
@@ -210,11 +210,11 @@ curl -sS -X POST "$BASE_URL/process_response/" \
             "entities": [
                 {
                     "type": "EMAIL",
-                    "start": 31,
-                    "end": 57,
-                    "processed_start": 31,
-                    "processed_end": 57,
-                    "text": "Roxane_Stracke58@gmail.com"
+                    "start": 21,
+                    "end": 41,
+                    "processed_start": 21,
+                    "processed_end": 41,
+                    "text": "Brittany40@gmail.com"
                 }
             ]
         },
@@ -228,7 +228,7 @@ curl -sS -X POST "$BASE_URL/process_response/" \
     "language": {
         "flagged": false,
         "enforced": false,
-        "status": "disabled",
+        "status": "checked",
         "error": null
     }
 }

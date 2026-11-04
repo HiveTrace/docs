@@ -8,6 +8,21 @@ Use **System users** to manage employee accounts that can sign in to the HiveTra
 
 ![System users page overview](../../../../../assets/img/en/system-users-table-4-4.webp)
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing the page | `System users` | `Read` |
+| Creating system users | `System users` | `Edit` |
+| Activating and deactivating system users | `System users` | `Edit` |
+| Deleting system users | `System users` | `Full` |
+| Viewing the active assignments of system users | `System users` | `Read` |
+| | `Roles and assignments` | `Read` |
+| Assigning roles to system users, revoking them | `System users` | `Read` |
+| | `Roles and assignments` | `Full` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## User table
 
 Each row represents one account. The table contains the following information:
@@ -78,29 +93,3 @@ An active assignment can be revoked. Revoking removes the role assignment from t
 - Use application groups for teams that work with the same set of applications.
 - Verify the system user's permissions after changing roles.
 - Revoke assignments if the system user should not have access.
-
-## Access to the page
-
-To view the system users table, the following permissions are required:
-
-- Area **System users** — access level of at least `Read`.
-
-To create system users, activate or deactivate them, the following permissions are required:
-
-- Area **System users** — access level of at least `Edit`.
-
-To delete system users, the following permissions are required:
-
-- Area **System users** — `Full` access level.
-
-To view the active assignments of system users, the following permissions are required:
-
-- Area **System users** — access level of at least `Read`;
-- Area **Roles and assignments** — access level of at least `Read`.
-
-To assign roles to system users and revoke them, the following permissions are required:
-
-- Area **System users** — access level of at least `Read`;
-- Area **Roles and assignments** — `Full` access level.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

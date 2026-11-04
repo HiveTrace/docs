@@ -6,6 +6,24 @@ sidebar:
 
 The **Applications** section lists AI applications connected to HiveTrace. Each application has its own integration type, operating mode, security checks, and traffic limits.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing the applications list | `Applications` | `Read` |
+| Opening the application page | `Applications` | `Read` |
+| Viewing the `Protection` tab | `Application policies` | `Read` |
+| Viewing the `Alerts` tab | `Application policies` | `Read` |
+| Viewing the `Users` tab | `End users` | `Read` |
+| Creating a new application | `Applications` | `Read` |
+| | `Application provisioning` | `Full` |
+| Editing an application from the header | `Applications` | `Edit` |
+| Deleting an application from the header | `Applications` | `Full` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
+## Opening the **Applications** section
+
 In the sidebar, select **Applications** to navigate to the **Applications** section.
 
 The banner with the total number of applications without configured protection is displayed at the top of the page. It is hidden when there are no such applications.
@@ -147,32 +165,3 @@ HiveTrace can extract text from request and response attachments and apply DataC
 - Do not reuse API tokens across applications.
 - Test policies after configuration changes.
 - During an investigation, rely on the configuration snapshot stored with the session.
-
-## Access to the page
-
-To view the applications list page and navigate to the required application page from it, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`.
-
-To view the **Protection** and **Alerts** tabs, the following permissions are required:
-
-- Area **Application policies** — access level of at least `Read`.
-
-To view the **Users** tab, the following permissions are required:
-
-- Area **End users** — access level of at least `Read`.
-
-To create a new application, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application provisioning** — `Full` access level.
-
-To edit an application in the header, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`.
-
-To delete an application in the header, the following permissions are required:
-
-- Area **Applications** — `Full` access level.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

@@ -7,6 +7,24 @@ sidebar:
 
 HiveTrace supports blacklists — regex patterns for blocking or masking matching content; when one is detected, the message is automatically marked as a violation. Blacklists are configured separately for messages and files.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing the page | `Applications` | `Read` |
+| | `Application policies` | `Read` |
+| Adding a new pattern, editing the existing ones | `Applications` | `Read` |
+| | `Application policies` | `Edit` |
+| Deleting a pattern | `Applications` | `Read` |
+| | `Application policies` | `Full` |
+| Editing an application from the header | `Applications` | `Edit` |
+| Deleting an application from the header | `Applications` | `Full` |
+| Updating the application profile | `Applications` | `Edit` |
+| | `Application policies` | `Edit` |
+| | `Protection profiles` | `Read` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## Opening the **Blacklists** section
 
 1. In the sidebar, select **Applications**.
@@ -77,36 +95,3 @@ Test the expression on representative data before enabling it. An overly broad p
 ## Verifying the result
 
 After saving the settings, send a test request through the connected application. Trigger results are available in **Session Analytics**: open a record and go to the **Censors** or **Validation Configuration** sections. For synchronous protected integrations, a violation may also result in the request being blocked.
-
-## Access to the page
-
-To edit an application in the header, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`.
-
-To delete an application in the header, the following permissions are required:
-
-- Area **Applications** — `Full` access level.
-
-To view the blacklist settings, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — access level of at least `Read`.
-
-To add a new pattern, edit the existing ones, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — access level of at least `Edit`.
-
-To delete a pattern, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — `Full` access level.
-
-To update the application profile, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`;
-- Area **Application policies** — access level of at least `Edit`;
-- Area **Protection profiles** — access level of at least `Read`.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

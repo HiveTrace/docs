@@ -6,9 +6,17 @@ sidebar:
 
 The **Service status** page shows overall platform availability, individual components, and their dependencies. Administrators open it from the profile menu and use it for initial diagnosis.
 
-![Platform summary and first service cards](../../../../../assets/img/en/service-status-summary-4-4.webp)
+## Required permissions
+
+To view service statuses, the following permissions are required:
+
+- Area **Platform** — access level of at least `Read`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
 
 ## Platform summary
+
+![Platform summary and first service cards](../../../../../assets/img/en/service-status-summary-4-4.webp)
 
 The top card contains the overall state and update time. The overall state takes component health into account: the platform can be reported as unavailable when a required service is down even if other components remain operational.
 
@@ -47,11 +55,3 @@ For example, `HTTP 503` means the checked service could not process the request 
 2. Inspect the affected service's dependencies and locate the lowest failing component.
 3. Record the error text and check time.
 4. Continue the investigation in that service's logs and metrics. This page does not provide restart or configuration controls.
-
-## Access to the page
-
-To view service statuses, the following permissions are required:
-
-- Area **Platform** — access level of at least `Read`.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

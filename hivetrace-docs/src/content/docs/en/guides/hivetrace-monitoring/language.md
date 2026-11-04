@@ -7,6 +7,22 @@ sidebar:
 
 The **Language check** section allows you to control the language of requests and responses: define the list of allowed languages and detect text in foreign languages.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing the page | `Applications` | `Read` |
+| | `Application policies` | `Read` |
+| Editing the language check settings | `Applications` | `Read` |
+| | `Application policies` | `Edit` |
+| Editing an application from the header | `Applications` | `Edit` |
+| Deleting an application from the header | `Applications` | `Full` |
+| Updating the application profile | `Applications` | `Edit` |
+| | `Application policies` | `Edit` |
+| | `Protection profiles` | `Read` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## Opening the **Language check** section
 
 1. In the sidebar, select **Applications**.
@@ -69,31 +85,3 @@ The threshold sets the permissible share of letters from other writing systems a
 The configured threshold can be reset using the `Reset threshold` button or via the toggle. After resetting, the threshold field returns to the default value — `25%`, and the toggle becomes inactive. Click `Save` to apply the changes.
 
 ![Tolerance](../../../../../assets/img/en/language-check-tolerance-4-4.webp)
-
-## Access to the page
-
-To edit an application in the header, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`.
-
-To delete an application in the header, the following permissions are required:
-
-- Area **Applications** — `Full` access level.
-
-To view the language check settings, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — access level of at least `Read`.
-
-To edit the language check settings, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — access level of at least `Edit`.
-
-To update the application profile, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`;
-- Area **Application policies** — access level of at least `Edit`;
-- Area **Protection profiles** — access level of at least `Read`.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

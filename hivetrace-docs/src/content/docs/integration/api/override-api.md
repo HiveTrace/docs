@@ -57,7 +57,7 @@ Override-эндпоинты позволяют задавать параметр
 ```json
 {
 	"application_id": "{{application_id}}",
-	"message": "My name is John, my CVC is 222, and I own a car.",
+	"message": "Меня зовут Иван, мой CVC 222, и у меня есть машина.",
 	"additional_parameters": {
 		"session_id": "{{client_session_id}}",
 		"user_id": "{{client_user_id}}"
@@ -70,8 +70,8 @@ Override-эндпоинты позволяют задавать параметр
 				"enabled": true,
 				"policies": [
 					{
-						"name": "medicine",
-						"prompt": "Do not provide medical advice or discuss medical topics."
+						"name": "медицина",
+						"prompt": "Не обсуждай медицинские темы."
 					}
 				]
 			},
@@ -81,9 +81,9 @@ Override-эндпоинты позволяют задавать параметр
 				"patterns": [
 					"CVC", 
 					{ 
-						"name": "AUTOMOBILE", 
-						"regex": "\\bcar\\b", 
-						"pseudonym": "car"
+						"name": "АВТОМОБИЛЬ",
+						"regex": "(?<![А-Яа-яЁё])машина(?![А-Яа-яЁё])", 
+						"pseudonym": "машина"
 					}
 				]
 			}

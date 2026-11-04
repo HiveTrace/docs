@@ -6,6 +6,17 @@ sidebar:
 
 The **User groups** section shows the groups added to the application and helps you navigate to the group members.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing the user groups page, opening a user group | `Applications` | `Read` |
+| | `End users` | `Read` |
+| Editing an application from the header | `Applications` | `Edit` |
+| Deleting an application from the header | `Applications` | `Full` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## Opening the **User groups** section
 
 1. In the sidebar, select **Applications**.
@@ -33,6 +44,74 @@ The page header displays the application's name, ID, and description (if any). T
 2. Confirm the deletion in the confirmation dialog.
 
 This action cannot be undone. Prior to deletion, please verify that integration traffic has been stopped or redirected and that the associated API tokens are no longer in use.
+
+## Automatic user group creation
+
+### Method and path
+
+`POST /api/integrations/openwebui/directory/sync`
+
+### Headers
+
+| Header | Value |
+|---|---|
+| `Content-Type` | `application/json` |
+| `Authorization` | `Bearer <integration source token>` |
+| `accept` | `*/*` |
+
+### Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `application_id` | `string` (UUID) | ID of the application the data is synchronized to |
+| `source_id` | `string` (UUID) | Source ID |
+| `revision` | `integer` | Synchronization revision number; incremented on each directory update |
+| `complete` | `boolean` | Snapshot completeness flag: `true` — a full directory snapshot is passed |
+| `users` | `array` | List of users |
+| `groups` | `array` | List of user groups |
+
+### User object (`users[]`)
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | External user ID |
+| `fio` | `string` | User full name |
+
+### Group object (`groups[]`)
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | Group ID |
+| `name` | `string` | Group name |
+| `description` | `string` | Group description |
+| `user_ids` | `string[]` | External IDs of the users in the group |
+
+## Example
+
+```json
+{
+    "application_id": "{{application_id}}",
+    "source_id": "{{source_id}}",
+    "revision": 1,
+    "complete": true,
+    "users": [
+        {
+            "id": "483cbf29-0178-4910-a999-0d903c651e25",
+            "fio": "Olga Ivanova"
+        }
+    ],
+    "groups": [
+        {
+            "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+            "name": "Production",
+            "description": "Team's production applications",
+            "user_ids": [
+                "483cbf29-0178-4910-a999-0d903c651e25"
+            ]
+        }
+    ]
+}
+```
 
 ## User groups table
 
@@ -74,20 +153,3 @@ Available actions:
 2. Open **Customize Columns** to choose the displayed columns.
 3. At the bottom of the table, select the number of rows per page or navigate to another page.
 4. Click the blue clickable link to navigate to the user's page.
-
-## Access to the page
-
-To edit an application in the header, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`.
-
-To delete an application in the header, the following permissions are required:
-
-- Area **Applications** — `Full` access level.
-
-To view the user groups page and open a user group, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **End users** — access level of at least `Read`.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

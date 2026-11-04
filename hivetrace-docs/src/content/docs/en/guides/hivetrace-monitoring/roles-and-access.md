@@ -6,6 +6,25 @@ sidebar:
 
 The **Roles and access** section is used to manage roles, application groups, and view system users' permissions. The section contains several tabs and screens. It is better to understand the tabs, and then perform specific configurations.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing roles and their assignments | `Roles and assignments` | `Read` |
+| Editing, duplicating, and deleting roles | `Roles and assignments` | `Full` |
+| Viewing application groups | `Roles and assignments` | `Read` |
+| | `Application groups` | `Read` |
+| Creating application groups | `Roles and assignments` | `Read` |
+| | `Application groups` | `Full` |
+| Adding applications to groups | `Roles and assignments` | `Read` |
+| | `Application groups` | `Full` |
+| Removing applications from groups | `Roles and assignments` | `Read` |
+| | `Application groups` | `Full` |
+| Viewing system user assignments | `Roles and assignments` | `Read` |
+| | `System users` | `Read` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## **Roles**
 
 On the `Roles` tab, one can view the list of created roles, creates new roles, and edits existing ones.
@@ -72,7 +91,7 @@ An access level is selected for eahc functional area:
 - `Edit` - a system user will be able to view and modify data.
 - `Full` - a system user will receive maximum access within this area, including additional actions, if available.
 
-Some functional areas have separate granular permissions. They are displayed to the right of the main access level and allow you to configure the role more precisely.
+Granular permissions are available for some areas with an access level of `Read` or higher. They are displayed to the right of the main access level and allow you to configure the role more precisely.
 
 For example, for the **Sessions and messages** area, one can separately allow:
 
@@ -178,30 +197,3 @@ The table displays the following data:
 - `Received through` - the source of the permission: the role, the assignment scope, and the grant date. This column helps understand how the system user has received a particular permission.
 
 ![Application Rights Table](../../../../../assets/img/en/effective-application-rights-table-4-4.webp)
-
-## Access to the page
-
-To view roles and their assignments, the following permissions are required:
-
-- Area **Roles and assignments** — access level of at least `Read`.
-
-To edit, duplicate, and delete roles, the following permissions are required:
-
-- Area **Roles and assignments** — `Full` access level.
-
-To view application groups, the following permissions are required:
-
-- Area **Roles and assignments** — access level of at least `Read`;
-- Area **Application groups** — access level of at least `Read`.
-
-To create application groups, add applications to groups, and remove applications from groups, the following permissions are required:
-
-- Area **Roles and assignments** — access level of at least `Read`;
-- Area **Application groups** — `Full` access level.
-
-To view system user assignments, the following permissions are required:
-
-- Area **Roles and assignments** — access level of at least `Read`;
-- Area **System users** — access level of at least `Read`.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

@@ -6,6 +6,19 @@ sidebar:
 
 API tokens authorize SDK and direct API integrations. A token value is displayed only once after creation.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing the page | `API tokens and integrations` | `Read` |
+| Adding a new API token | `Applications` | `Read` |
+| | `API tokens and integrations` | `Edit` |
+| Deleting an API token | `API tokens and integrations` | `Full` |
+
+> **Note:** you can view, create, and delete tokens only within the scope available to you. The scope can be a specific application, an application group, or all applications — if the assignment scope is `Whole system`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## API-token table
 
 ![API-token table](../../../../../assets/img/en/api-tokens-table-4-4.webp)
@@ -53,20 +66,3 @@ Deletion immediately revokes integration access. Move the application to a repla
 ## Security
 
 Send the token as `Authorization: Bearer <token>`. Never place it in browser code, source control, logs, or documentation examples. Use separate short-lived tokens per application and environment, rotate them, and revoke unused credentials.
-
-## Access to the page
-
-To view the API tokens table, the following permissions are required:
-
-- Area **API tokens and integrations** — access level of at least `Read`.
-
-To add a new API token, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **API tokens and integrations** — access level of at least `Edit`.
-
-To delete an API token, the following permissions are required:
-
-- Area **API tokens and integrations** — `Full` access level.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

@@ -6,6 +6,19 @@ sidebar:
 
 The **Alert Rules** section defines how, when, and under what conditions notifications about violations are sent. Settings are configured separately for each violation type.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing the page | `Applications` | `Read` |
+| | `Application policies` | `Read` |
+| Configuring notifications about violations and token usage | `Applications` | `Read` |
+| | `Application policies` | `Edit` |
+| Editing an application from the header | `Applications` | `Edit` |
+| Deleting an application from the header | `Applications` | `Full` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## Opening the **Alert Rules** section
 
 1. In the sidebar, select **Applications**.
@@ -146,25 +159,3 @@ When changes are made on the page, the panel with action buttons appears:
 
 - **Cancel** — discards the changes and reverts the page to the previous saved state;
 - **Save** — saves the changes.
-
-## Access to the page
-
-To edit an application in the header, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`.
-
-To delete an application in the header, the following permissions are required:
-
-- Area **Applications** — `Full` access level.
-
-To view the **Alert rules** page, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — access level of at least `Read`.
-
-To configure notifications about violations and token usage, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — access level of at least `Edit`.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.

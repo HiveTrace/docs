@@ -7,6 +7,24 @@ sidebar:
 
 The **Data Cleansing** section configures sensitive-data processing for each application. Saved settings apply to new messages and files.
 
+## Required permissions
+
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing the page | `Applications` | `Read` |
+| | `Application policies` | `Read` |
+| Editing the DataClean settings | `Applications` | `Read` |
+| | `Application policies` | `Edit` |
+| Deleting custom and whitelist patterns | `Applications` | `Read` |
+| | `Application policies` | `Full` |
+| Editing an application from the header | `Applications` | `Edit` |
+| Deleting an application from the header | `Applications` | `Full` |
+| Updating the application profile | `Applications` | `Edit` |
+| | `Application policies` | `Edit` |
+| | `Protection profiles` | `Read` |
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
 ## Opening the **Data Cleansing** section
 
 1. In the sidebar, select **Applications**.
@@ -167,36 +185,3 @@ The result table shows the entity type, original text, and processed text. Use *
 4. Configure files, inspection depth, and source storage.
 5. Test the configuration.
 6. Send a test request and verify it in **Session analytics**.
-
-## Access to the page
-
-To edit an application in the header, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`.
-
-To delete an application in the header, the following permissions are required:
-
-- Area **Applications** — `Full` access level.
-
-To view the DataClean settings, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — access level of at least `Read`.
-
-To edit the DataClean settings, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — access level of at least `Edit`.
-
-To delete custom and whitelist patterns, the following permissions are required:
-
-- Area **Applications** — access level of at least `Read`;
-- Area **Application policies** — `Full` access level.
-
-To update the application profile, the following permissions are required:
-
-- Area **Applications** — access level of at least `Edit`;
-- Area **Application policies** — access level of at least `Edit`;
-- Area **Protection profiles** — access level of at least `Read`.
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.
