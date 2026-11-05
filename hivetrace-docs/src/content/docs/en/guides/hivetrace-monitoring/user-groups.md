@@ -12,12 +12,13 @@ The **User groups** section shows the groups added to the application and helps 
 |---|---|---|
 | Viewing the user groups page, opening a user group | `Applications` | `Read` |
 | | `End users` | `Read` |
+| Creating an end-user directory source | `API tokens and integrations` | `Edit` |
 | Editing an application from the header | `Applications` | `Edit` |
 | Deleting an application from the header | `Applications` | `Full` |
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **User groups** section
+## Opening the `User groups` section
 
 1. In the sidebar, select **Applications**.
 2. Open the required application by clicking its card or its name, depending on the selected view.
@@ -45,6 +46,36 @@ The page header displays the application's name, ID, and description (if any). T
 
 This action cannot be undone. Prior to deletion, please verify that integration traffic has been stopped or redirected and that the associated API tokens are no longer in use.
 
+## End-user directory source creation
+
+### Method and path
+
+`POST /api/integration-sources/`
+
+### Headers
+
+| Header | Value |
+|---|---|
+| `Content-Type` | `application/json` |
+| `Authorization` | `Bearer <access_token>` |
+| `accept` | `*/*` |
+
+### Request body
+
+| Field | Type | Description |
+|---|---|---|
+| `application_id` | `string` (UUID) | Application ID |
+| `name` | `string` (UUID) | Source name |
+
+## Example
+
+```json
+{
+    "application_id": "{{application_id}}",
+    "name": "OpenWebUI"  
+}
+```
+
 ## Automatic user group creation
 
 ### Method and path
@@ -56,8 +87,8 @@ This action cannot be undone. Prior to deletion, please verify that integration 
 | Header | Value |
 |---|---|
 | `Content-Type` | `application/json` |
-| `Authorization` | `Bearer <integration source token>` |
-| `accept` | `*/*` |
+| `Authorization` | `Bearer <integration_source_token>` |
+| `Accept` | `*/*` |
 
 ### Request body
 

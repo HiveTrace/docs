@@ -22,7 +22,7 @@ The **Applications** section lists AI applications connected to HiveTrace. Each 
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **Applications** section
+## Opening the `Applications` section
 
 In the sidebar, select **Applications** to navigate to the **Applications** section.
 

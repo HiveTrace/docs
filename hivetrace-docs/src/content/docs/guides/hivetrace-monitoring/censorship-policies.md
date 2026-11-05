@@ -73,7 +73,7 @@ HiveTrace Guardrail — встроенная защита от небезопа�
 
 После изменения переключателей нажмите **Сохранить**. Кнопка **Сбросить** отменяет несохранённые изменения и возвращает значения по умолчанию.
 
-![Раздел HiveTrace Guardrail](../../../../assets/img/policies-overview-4-4.webp)
+![Раздел HiveTrace Guardrail](../../../../assets/img/policies-guardrail-4-4.webp)
 
 ## Пользовательские политики
 

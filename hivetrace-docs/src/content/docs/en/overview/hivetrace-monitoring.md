@@ -39,10 +39,10 @@ The menu header shows the current user's avatar and name. The following destinat
 
 | Item | Destination |
 | --- | --- |
-| [**Application settings**](../guides/hivetrace-monitoring/platform-settings/) | Global monitoring and protection module settings |
-| [**Service status**](../guides/hivetrace-monitoring/service-status/) | Platform component health and service availability |
-| [**License and limits**](../guides/hivetrace-monitoring/license-limits/) | Active license information and available limits |
-| [**What's new?**](../guides/hivetrace-monitoring/whats-new/) | Changes and capabilities introduced in recent releases |
+| [**App Configuration**](../../guides/hivetrace-monitoring/app-configuration) | Global monitoring and protection module settings |
+| [**Service status**](../../guides/hivetrace-monitoring/service-status) | Platform component health and service availability |
+| [**License and limits**](../../guides/hivetrace-monitoring/license-limits/) | Active license information and available limits |
+| [**What's new?**](../../guides/hivetrace-monitoring/whats-new/) | Changes and capabilities introduced in recent releases |
 | **Documentation** | HiveTrace user documentation, opened in a separate tab |
 | **Sign out** | Ends the current session and returns to the sign-in page |
 

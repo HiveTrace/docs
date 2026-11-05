@@ -79,7 +79,7 @@ Select **Save** to apply changes. **Reset to Defaults** discards unsaved changes
 
 A custom policy validates user requests using an instruction prompt. The **Model rules** table displays the name and prompt of every policy.
 
-![Custom policy table](../../../../../assets/img/en/policies-custom-policies-table-4-4.webp)
+![Custom policy table](../../../../../assets/img/en/policies-custom-list-4-4.webp)
 
 Available actions:
 

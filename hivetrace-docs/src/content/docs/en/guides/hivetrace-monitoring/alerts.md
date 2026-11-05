@@ -36,7 +36,7 @@ The main component of the page is a table displaying alert details.
 
 > **Note:** if no notification channels are configured for the application, the **Channels** field will remain empty. The alert is still recorded and visible on this page.
 
-The screenshot's `token_usage` and `custom_policy_message_model_violation` values are examples. The actual value identifies the check or threshold that generated the alert.
+The screenshot's `token_usage` values are examples. The actual value identifies the check or threshold that generated the alert.
 
 Horizontal scrolling reveals columns that do not fit on the screen at the same time.
 

@@ -137,6 +137,8 @@ Allowed values for **predefined** patterns:
 
 Each item should be an object with a custom pattern `{ "name": "...", "value": "..." }`
 
+### Example
+
 ```json
 {
     "application_id": "{{application_id}}",
@@ -185,6 +187,8 @@ Each item should be an object with a custom pattern `{ "name": "...", "value": "
 
 Data can be depseudonymized within a session.
 
+### Example
+
 ```json
 {
     "application_id": "{{application_id}}",
@@ -215,6 +219,8 @@ Data can be depseudonymized within a session.
 `patterns` — patterns from this list are applied to message text.
 
 Each item should be an object with a custom pattern `{ "name": "...", "pattern": "..." }`
+
+### Example
 
 ```json
 {
@@ -250,6 +256,8 @@ Each item should be an object with a custom pattern `{ "name": "...", "pattern":
 `patterns` — patterns from this list are applied to the contents of files attached to a request or a response.
 
 Each item should be an object with a custom pattern `{ "name": "...", "pattern": "..." }`
+
+### Example
 
 ```json
 {
@@ -287,6 +295,8 @@ Each item should be an object with a custom pattern `{ "name": "...", "pattern":
 `enforce` - indicates the block was set for language mismatch.
 
 `tolerance` - sets the permissible share of letters from other writing systems at which the text is not yet considered a violation. The threshold can be set from 0 to 1.
+
+### Example
 
 ```json
 {

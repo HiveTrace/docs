@@ -19,7 +19,7 @@ The **Profiles** section allows you to configure protection once and apply it to
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **Profiles** section
+## Opening the `Profiles` section
 
 1. In the sidebar, select **Applications**.
 2. Click the **Profiles** tab.
@@ -34,11 +34,11 @@ Above the table there is the **Create profile** button, and below the table ther
 
 By default, profiles are displayed as cards — each profile is presented as a separate card with key information.
 
-![Profile cards](../../../../../assets/img/en/profile-cards-4-4.webp)
+![Profile cards](../../../../../assets/img/en/profiles-cards-4-4.webp)
 
 You can also switch the display to table view, in which data are presented as rows and columns.
 
-![Profile table](../../../../../assets/img/en/profile-table-4-4.webp)
+![Profile table](../../../../../assets/img/en/profiles-table-4-4.webp)
 
 Regardless of the selected view, the following data are displayed for each profile:
 
@@ -96,7 +96,7 @@ Select `Add Custom Pattern` to create a rule. A disabled pattern remains saved b
 
 The counter on the button shows the number of patterns in the block; if there are no patterns, `No patterns` is displayed.
 
-![Profile - blacklist prompts](../../../../../assets/img/en/profile-create-blacklist-prompts-4-4.webp)
+![Profile - blacklist prompts](../../../../../assets/img/en/profile-create-blacklist-prompt-4-4.webp)
 
 ### Blacklist files
 
@@ -106,7 +106,7 @@ Select `Add Custom Pattern` to create a rule. A disabled pattern remains saved b
 
 The counter on the button shows the number of patterns in the block; if there are no patterns, `No patterns` is displayed.
 
-![Profile - blacklist files](../../../../../assets/img/en/profile-create-blacklist-files-4-4.webp)
+![Profile - blacklist files](../../../../../assets/img/en/profile-create-blacklist-file-4-4.webp)
 
 ### Language check
 
@@ -120,7 +120,7 @@ The **Language check** block allows you to control the language of requests and 
 
 **Tolerance** — a share of letters from other writing systems at which the text is not yet considered a violation. The configured threshold can be reset using the `Reset threshold` button or via the toggle. After resetting, the threshold field returns to the default value — `25%`, and the toggle becomes inactive.
 
-![Profile - language check](../../../../../assets/img/en/profile-create-language-check-4-4.webp)
+![Profile - language check](../../../../../assets/img/en/profile-create-language-4-4.webp)
 
 ### Data Cleansing
 

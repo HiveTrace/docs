@@ -18,7 +18,7 @@ The **Integration** section allows you to choose how the application integrates 
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **Integration** section
+## Opening the `Integration` section
 
 1. In the sidebar, select **Applications**.
 2. Open the required application by clicking its card or its name, depending on the selected view.

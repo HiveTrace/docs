@@ -23,20 +23,20 @@ The **Language check** section allows you to control the language of requests an
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **Language check** section
+## Opening the `Language check` section
 
 1. In the sidebar, select **Applications**.
 2. Open the required application by clicking its card or its name, depending on the selected view.
 3. Hover over the **Protection** tab.
 4. Click **Language check**.
 
-![Navigating to the Language check section](../../../../../assets/img/en/language-check-redirect-4-4.webp)
+![Navigating to the Language check section](../../../../../assets/img/en/language-redirect-4-4.webp)
 
 The page header displays the application's name, ID, and description (if any). The copy button is available next to the ID. The header also contains the `Back to applications` link that leads to the `Applications` section.
 
 ## Editing the application
 
-![Language check - editing the application](../../../../../assets/img/en/language-check-edit-app-4-4.webp)
+![Language check - editing the application](../../../../../assets/img/en/language-edit-app-4-4.webp)
 
 1. Click `Edit`.
 2. Change the required fields.
@@ -44,7 +44,7 @@ The page header displays the application's name, ID, and description (if any). T
 
 ## Deleting the application
 
-![Language check - deleting the application](../../../../../assets/img/en/language-check-delete-app-4-4.webp)
+![Language check - deleting the application](../../../../../assets/img/en/language-delete-app-4-4.webp)
 
 1. Click `Delete`.
 2. Confirm the deletion in the confirmation dialog.
@@ -60,7 +60,7 @@ The profile can be updated on the page:
 2. Select the required profile from the list. The search field helps narrow the list.
 3. Confirm applying the profile to the application in the confirmation dialog.
 
-![Language check - profile](../../../../../assets/img/en/language-check-profile-4-4.webp)
+![Language check - profile](../../../../../assets/img/en/language-profile-4-4.webp)
 
 ## Allowed languages
 
@@ -68,7 +68,7 @@ The following languages are available in this section: `English`, `Arabic`, `Arm
 
 To allow a language, select its checkbox; you can choose one language or several — up to all of them.
 
-![Allowed languages](../../../../../assets/img/en/language-check-allowed-languages-4-4.webp)
+![Allowed languages](../../../../../assets/img/en/language-allowed-languages-4-4.webp)
 
 ## Request and response checks
 
@@ -76,7 +76,7 @@ Checks for incoming and outgoing messages are enabled separately.
 
 > **Note:** to switch the request or response check toggle to the active state, at least one language must be selected.
 
-![Language check - switches](../../../../../assets/img/en/language-check-switches-4-4.webp)
+![Language check - switches](../../../../../assets/img/en/language-switches-4-4.webp)
 
 ## Tolerance
 
@@ -84,4 +84,4 @@ The threshold sets the permissible share of letters from other writing systems a
 
 The configured threshold can be reset using the `Reset threshold` button or via the toggle. After resetting, the threshold field returns to the default value — `25%`, and the toggle becomes inactive. Click `Save` to apply the changes.
 
-![Tolerance](../../../../../assets/img/en/language-check-tolerance-4-4.webp)
+![Tolerance](../../../../../assets/img/en/language-tolerance-4-4.webp)

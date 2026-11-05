@@ -60,7 +60,7 @@ Options are **All**, **Any violation**, **No violations**, **Safety policy** (Gu
 
 ## Saved filters
 
-![Sessions - saved filter sets](../../../../../assets/img/en/sessions-saved-filters-4-4.webp)
+![Sessions - saved filter sets](../../../../../assets/img/en/sessions-saved-filter-4-4.webp)
 
 This section stores named condition sets; the button badge is their count. Apply at least one filter before saving. Selecting a card reapplies its conditions. Available set actions let you rename, update from the current conditions, or delete it.
 
@@ -92,7 +92,7 @@ Records load in batches; the label above the table shows loaded and total counts
 
 Sessions can be sorted by date — ascending or descending. By default, descending sorting is applied. If `Newest first` is selected, descending sorting is applied; if `Oldest first` is selected, ascending sorting is applied.
 
-![Record identifiers and column settings](../../../../../assets/img/en/sessions-columns-settings-4-4.webp)
+![Record identifiers and column settings](../../../../../assets/img/en/session-columns-settings-4-4.webp)
 
 **Customize Columns** shows the visible-column count and toggles record ID, session, user, application, message, agents/tool calls, files, violation, direction, and date.
 

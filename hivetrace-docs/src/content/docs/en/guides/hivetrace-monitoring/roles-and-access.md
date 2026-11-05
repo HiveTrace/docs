@@ -25,7 +25,7 @@ The **Roles and access** section is used to manage roles, application groups, an
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## **Roles**
+## The `Roles` tab
 
 On the `Roles` tab, one can view the list of created roles, creates new roles, and edits existing ones.
 
@@ -39,7 +39,7 @@ The page displays a table of roles:
 - **Permissions** — a brief summary of the permissions included in the role;
 - **Actions menu** — edits, duplicates, and deletes a specific role.
 
-![Roles table](../../../../../assets/img/en/roles-and-access-roles-table-4-4.webp)
+![Roles table](../../../../../assets/img/en/roles-table-4-4.webp)
 
 **Column settings** hides or restores columns. **Rows per page**, **Previous**, and **Next** control pagination.
 
@@ -55,7 +55,7 @@ System roles are typically used as preconfigured access sets, while custom roles
 
 Click `Add New Role` or select `Edit` from the **⋮** menu.
 
-![Creating a custom role](../../../../../assets/img/en/roles-and-access-role-create-4-4.webp)
+![Creating a custom role](../../../../../assets/img/en/role-create-4-4.webp)
 
 The general information is filled in at the top of the page:
 
@@ -114,7 +114,7 @@ Such permissions do not replace the general access level but rather refine it. I
 
 Only a custom role without active assignments can be deleted. If the role still has assignments, deletion is blocked. After deletion, the role disappears from the list and can no longer be assigned to new system users.
 
-## **Application Groups**
+## The `Application Groups` tab
 
 On the `Application groups` tab, one can view, create, and edit application groups. This is convenient when several system users need to be granted the same access to a shared set of applications. For example, you can create a `Production` group, add applications to it, and assign roles to the group.
 
@@ -145,7 +145,7 @@ The main area of the page contains application group cards. Each card shows:
 
 The search field is used to find a group in the table.
 
-![Application Groups](../../../../../assets/img/en/groups-application-groups-4-4.webp)
+![Application Groups](../../../../../assets/img/en/application-groups-4-4.webp)
 
 The information icon opens the group's side panel. It displays:
 
@@ -161,7 +161,7 @@ The actions menu allows you to edit or delete the group. Only a group without ac
 
 Each application — both in the `Ungrouped` column and inside a group — is displayed with its name (a blue clickable link leading to the application card) and description (if any).
 
-## **Effective Rights**
+## The `Effective Rights` tab
 
 On the `Effective permissions` tab, one can select a system user and view which permissions they have received after all assignments. The tab is used for verification, permissions cannot be changed directly on the page: changes are made through roles, application groups, and role assignments.
 
@@ -170,7 +170,7 @@ At the top of the page, there are two filters:
 - `Subject` — the list of system users.
 - `Application` — the scope of verification. One can select `All applications` or a specific application.
 
-![Effective rights filters](../../../../../assets/img/en/effective-rights-filters-4-4.webp)
+![Effective rights filters](../../../../../assets/img/en/effective-rights-filter-4-4.webp)
 
 ### System Rights Table
 
@@ -183,7 +183,7 @@ The table displays the following data:
 - `Granular permissions` - additional permissions within the area, if any. If there are no additional permissions, `No granular permissions` is displayed.
 - `Received through` - the source of the permission: the role, the assignment scope, and the grant date. This column helps understand how the system user has received a particular permission.
 
-![System Rights Table](../../../../../assets/img/en/effective-system-rights-table-4-4.webp)
+![System Rights Table](../../../../../assets/img/en/effective-rights-system-rights-table-4-4.webp)
 
 ### Application Rights Table
 
@@ -196,4 +196,4 @@ The table displays the following data:
 - `Granular permissions` - additional permissions within the area, if any. If there are no additional permissions, `No granular permissions` is displayed.
 - `Received through` - the source of the permission: the role, the assignment scope, and the grant date. This column helps understand how the system user has received a particular permission.
 
-![Application Rights Table](../../../../../assets/img/en/effective-application-rights-table-4-4.webp)
+![Application Rights Table](../../../../../assets/img/en/effective-rights-application-rights-table-4-4.webp)

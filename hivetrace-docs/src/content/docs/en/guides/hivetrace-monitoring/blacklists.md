@@ -25,7 +25,7 @@ HiveTrace supports blacklists — regex patterns for blocking or masking matchin
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **Blacklists** section
+## Opening the `Blacklists` section
 
 1. In the sidebar, select **Applications**.
 2. Open the required application by clicking its card or its name, depending on the selected view.

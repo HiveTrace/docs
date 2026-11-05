@@ -28,7 +28,7 @@ The **Users** section lists the end users of the selected AI application and pro
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **Users** section
+## Opening the `Users` section
 
 1. In the sidebar, select **Applications**.
 2. Open the required application by clicking its card or its name, depending on the selected view.

@@ -78,7 +78,7 @@ Having a permission does not automatically grant a user access to a specific app
 2. Expand the system user's row.
 3. View the `Active assignments` table.
 
-![Viewing the system user's active assignments](../../../../../assets/img/en/system-user-active-assignments-4-4.webp)
+![Viewing the system user's active assignments](../../../../../assets/img/en/system-user-assignments-4-4.webp)
 
 The table shows which roles have already been granted to the system user, where they apply, who granted the assignment, and when it was granted. If there are no assignments, `No results` is displayed.
 

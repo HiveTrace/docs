@@ -25,7 +25,7 @@ The **Data Cleansing** section configures sensitive-data processing for each app
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **Data Cleansing** section
+## Opening the `Data Cleansing` section
 
 1. In the sidebar, select **Applications**.
 2. Open the required application by clicking its card or its name, depending on the selected view.
@@ -90,7 +90,7 @@ Each card has two switches: **Input** checks user requests and **Output** checks
 
 **Custom patterns** add team-specific regular expressions. 
 
-![Custom patterns](../../../../../../public/images/hivetrace-monitoring/dataclean/en/data-cleansing-custom-patterns-4-4.png)
+![Custom patterns](../../../../../../public/images/hivetrace-monitoring/dataclean/en/data-cleansing-regex-patterns-4-4.png)
 
 Click **Add Custom Pattern** and fill out the form:
 
@@ -175,7 +175,7 @@ Source-storage switches retain both original and cleaned messages for comparison
 
 The result table shows the entity type, original text, and processed text. Use **Customize Columns** to select visible columns.
 
-![Detected sensitive-data table](../../../../../../public/images/hivetrace-monitoring/dataclean/en/data-cleansing-data-detected-4-4.png)
+![Detected sensitive-data table](../../../../../../public/images/hivetrace-monitoring/dataclean/en/data-cleansing-detected-data-4-4.png)
 
 ## Recommended setup order
 

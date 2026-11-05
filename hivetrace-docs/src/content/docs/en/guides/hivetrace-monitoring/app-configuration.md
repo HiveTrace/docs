@@ -21,7 +21,7 @@ If the user does not have access to view the page, `403 — Access denied` is di
 
 System users can review and change the settings available for the current HiveTrace instance. 
 
-![Platform settings page](../../../../../assets/img/en/platform-settings-4-4.webp)
+![Platform settings page](../../../../../assets/img/en/app-configuration-4-4.webp)
 
 The settings are available for data cleansing, custom policies, Guardrail, and custom file processing. They override application settings. If a check is disabled at the platform level, it will not be performed in any application — even if the corresponding switch is enabled in the application settings. The global settings do not change the saved application settings.
 

@@ -21,7 +21,7 @@ On the **Communication channels** section, you can review existing notification 
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **Communication channels** section
+## Opening the `Communication channels` section
 
 1. In the sidebar, select **Applications**.
 2. Open the required application by clicking its card or its name, depending on the selected view.

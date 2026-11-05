@@ -19,7 +19,7 @@ The **Alert Rules** section defines how, when, and under what conditions notific
 
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
-## Opening the **Alert Rules** section
+## Opening the `Alert Rules` section
 
 1. In the sidebar, select **Applications**.
 2. Open the required application by clicking its card or its name, depending on the selected view.
