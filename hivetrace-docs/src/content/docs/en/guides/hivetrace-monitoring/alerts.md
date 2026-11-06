@@ -12,6 +12,8 @@ To view the **Alerts** page, the following permissions are required:
 
 - Area **Sessions and messages** — access level of at least `Read`.
 
+> **Note:** the data can be viewed only within the scope available to a user. The scope can be a specific application, an application group, or all applications — if the assignment scope is `Whole system`.
+
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
 ## Alerts table

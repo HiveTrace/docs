@@ -21,6 +21,8 @@ sidebar:
 | Exporting sessions | `Sessions and messages` | `Read` |
 | | `Granular permission` | `Export sessions` |
 
+> **Note:** sessions can be viewed and exported only within the scope available to a user. The scope can be a specific application, an application group, or all applications — if the assignment scope is `Whole system`.
+
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
 ## Search and export

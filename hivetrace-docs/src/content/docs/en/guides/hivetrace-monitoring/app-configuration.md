@@ -12,10 +12,8 @@ sidebar:
 
 | Action | Area | Min. access level |
 |---|---|---|
-| Viewing the page | `Platform` | `Read` |
+| Opening the modal dialog | `Platform` | `Read` |
 | Editing application configurations | `Platform` | `Edit` |
-
-If the user does not have access to view the page, `403 — Access denied` is displayed.
 
 ## General settings
 

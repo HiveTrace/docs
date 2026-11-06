@@ -20,6 +20,8 @@ The **Applications** section lists AI applications connected to HiveTrace. Each 
 | Editing an application from the header | `Applications` | `Edit` |
 | Deleting an application from the header | `Applications` | `Full` |
 
+> **Note:** applications can be viewed, created, and deleted only within the scope available to a user. The scope can be a specific application, an application group, or all applications — if the assignment scope is `Whole system`.
+
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
 ## Opening the `Applications` section

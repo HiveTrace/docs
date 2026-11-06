@@ -14,6 +14,8 @@ The **Billing** section shows LLM load in requests and tokens. Use it to identif
 | Filtering by application | `Applications` | `Read` |
 | | `Analytics` | `Read` |
 
+> **Note:** the data can be viewed only within the scope available to a user. The scope can be a specific application, an application group, or all applications — if the assignment scope is `Whole system`.
+
 If the user does not have access to view the page, `403 — Access denied` is displayed.
 
 ## Quick filters
