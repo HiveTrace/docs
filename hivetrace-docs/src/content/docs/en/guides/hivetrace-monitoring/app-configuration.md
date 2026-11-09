@@ -23,4 +23,8 @@ System users can review and change the settings available for the current HiveTr
 
 The settings are available for data cleansing, custom policies, Guardrail, and custom file processing. They override application settings. If a check is disabled at the platform level, it will not be performed in any application — even if the corresponding switch is enabled in the application settings. The global settings do not change the saved application settings.
 
-Before saving, verify that the changes match your deployment configuration and organizational policies.
+## Applying changes
+
+Each switch saves its new value immediately. There is no separate **Save** button: closing the dialog does not cancel a successful change. Before switching a setting, consider its effect on all applications.
+
+Wait for the success notification. If an error appears, reopen the settings and check the current value before trying again. To undo a saved change, switch the setting back and wait for confirmation. With read-only access, the switches are disabled.

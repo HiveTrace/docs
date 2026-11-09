@@ -57,6 +57,24 @@ All fields are marked with an asterisk and are require. The eye icon in **Passwo
 
 After the user is added successfully, the account appears in the table. Access to the interface sections is not automatically granted upon account creation: a role must be assigned. The role determines what the user can do within the scope of the assignment: it defines which operations are allowed and which remain unavailable.
 
+## Activating and deactivating an account
+
+1. Find the account and open its **⋮** menu.
+2. Select **Deactivate** for an active account or **Activate** for an inactive one.
+3. Wait for the success notification and check the **Is Active** column.
+
+The action applies immediately, without a separate confirmation dialog. Deactivation prevents the user from accessing the platform but keeps the account and its role assignments. To restore access, activate the account again; the assigned roles still determine which sections are available.
+
+## Deleting an account
+
+1. Find the account and open **⋮ → Delete**.
+2. Review the confirmation dialog and click **Delete**. Close the dialog to cancel.
+3. Wait for the success notification and check that the account has disappeared from the table.
+
+There is no account-restore action on this page. Use **Deactivate** when access only needs to be suspended.
+
+Activation and deactivation require **System users → Edit**; deletion requires **Full** access. Without the corresponding permission, the action is not shown. You cannot deactivate or delete your own account, or remove the last active system administrator. If an action is rejected, read the error notification; have another administrator perform an allowed action or first ensure another active administrator has the required system role.
+
 ## Assigning a role to a system user
 
 1. Find the account in the system users table.

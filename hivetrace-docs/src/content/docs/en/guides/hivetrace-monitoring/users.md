@@ -227,11 +227,27 @@ The block shows the distribution of files by verification results:
 
 `Clean` — total number of files whose verification found no violations;
 
-`Not checked` — total number of files that have not yet been verified;
+`Not checked` — total number of files without a completed content-check result; this is not confirmation that a file is safe;
 
 `Check failed` — total number of files for which an error occurred during verification;
 
 `Blocked` — total number of files blocked based on verification results.
+
+### Processing states
+
+The **Check** column displays the result when it is available. Otherwise, it may display the processing state:
+
+| State | Meaning and next action |
+|---|---|
+| **Pending** | The file is waiting for processing. Wait and refresh the page. |
+| **Processing** | The file is being processed. Wait for the result. |
+| **Retrying** | The system is retrying processing. Wait; if the state persists, report the file and message IDs to an administrator. |
+| **Checked** | Processing has finished. Check the findings; this state alone does not mean **Clean**. |
+| **Failed** | Processing failed. Report the file and message IDs to an administrator. |
+| **Skipped** | Processing was skipped. Check whether file processing is enabled for this application; do not treat this as a successful check. |
+| **Unsupported** | The file format is not supported for this processing. Ask an administrator which format to use. |
+
+**Not checked**, **Check failed**, **Skipped**, and **Unsupported** do not mean **Clean**. The presence of a file in the table, its availability for download, and its check result are separate properties.
 
 ### Detections
 
@@ -280,9 +296,16 @@ The table displays files uploaded to the user's sessions. For supported formats,
 Available actions:
 
 1. Click `Download selected` to download the files checked in the table. The button is disabled until at least one file is selected.
-2. Click `Download all` to download all files.
+2. Click `Download all` to download a ZIP archive of the available files on the **current table page**, with the current filters. Files on other pages are not included.
 3. Open **Customize Columns** to choose the displayed columns.
 4. Click the **⋮** button in a table row to download the selected file.
 5. Click the file name to open the file preview.
 
 > **Important:** file content processing depends on the global **Custom file processing** setting and the selected application configuration. If processing is disabled, a file appearing on this tab does not by itself mean that its contents were checked by policies or Dataclean.
+
+
+### Why a file cannot be downloaded
+
+Preview, selection, and download are available only when the file contents are stored and you have permission to download analysis files. If contents are unavailable, a file-unavailable icon appears beside the name; preview, selection, and download for that row are disabled. The record and its analysis results can still remain in the table.
+
+If you have no download permission, the download controls are hidden. Ask an administrator for the required access. **Download selected** is disabled when no available files are selected; **Download all** is disabled when the current page has no available files. Check the current page and filters before downloading an archive.

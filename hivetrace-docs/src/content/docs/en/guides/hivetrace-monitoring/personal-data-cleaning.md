@@ -110,6 +110,16 @@ The three-dot menu provides edit and delete actions, as well as access to the pa
 
 The counter shows the number of patterns in the section; if there are no custom patterns, `No custom patterns yet. Add a pattern to define application-specific data cleansing rules.` is displayed.
 
+### Version history and restoration
+
+1. Open **⋮ → Version history** for the custom pattern.
+2. Find the required version. Each card shows its number, creation date, author, action, and saved settings. Use **Load more** if the version is not yet displayed.
+3. Compare the saved settings with the version marked **Current Version**.
+4. Click **Restore** beside the required previous version. The action applies immediately; there is no separate confirmation dialog.
+5. Wait for the success notification. The dialog closes and the page refreshes. Check the restored settings and test the custom pattern with a sample message.
+
+The current version has a label instead of a **Restore** button. Restoring requires **Application policies → Edit** for this application; without that permission, the button is disabled. Closing the history dialog without clicking **Restore** does not change the settings. Restoration changes the current custom pattern; it does not recalculate previously processed messages.
+
 ## Whitelist patterns
 
 **Whitelist patterns** define exceptions for values that resemble sensitive data but are valid in your workflow.
@@ -162,6 +172,14 @@ Message and file inspection depth controls how much context is analyzed. Deeper 
 Source-storage switches retain both original and cleaned messages for comparison in analytics. Enable them only when permitted by your access and retention policies.
 
 ![Original message storage](../../../../../../public/images/hivetrace-monitoring/dataclean/en/data-cleansing-message-storage-4-4.png)
+
+## Saving file and message-storage settings
+
+On the application's **Data Cleansing** page, the **Incoming files**, **Outgoing files**, and original-message storage switches save automatically. After changing a switch, wait for the success notification; no separate **Save** click is needed. If saving fails, an error notification appears and these switches return to their previous values.
+
+Closing the page does not undo a successful save. To revert it, switch the setting back and wait for confirmation. These rules describe the application page: in the profile editor, changes are applied through **Save settings** and the confirmation flow described in [Profiles](../profiles/).
+
+Turning off original-message storage affects subsequent processing; it does not delete previously stored messages. The absence of original text in analytics does not by itself mean that the message was never received or checked.
 
 ## Test data cleaning
 

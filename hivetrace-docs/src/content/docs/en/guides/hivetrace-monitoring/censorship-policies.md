@@ -107,6 +107,16 @@ Test both prohibited and acceptable wording. Select **Save** when finished; **Ca
 
 ![Editing and testing a custom policy](../../../../../assets/img/en/policies-custom-edit-test-4-4.webp)
 
+### Version history and restoration
+
+1. Open **⋮ → Version history** for the policy.
+2. Find the required version. Each card shows its number, creation date, author, action, and saved settings. Use **Load more** if the version is not yet displayed.
+3. Compare the saved settings with the version marked **Current Version**.
+4. Click **Restore** beside the required previous version. The action applies immediately; there is no separate confirmation dialog.
+5. Wait for the success notification. The dialog closes and the page refreshes. Check the restored settings and test the policy with a sample message.
+
+The current version has a label instead of a **Restore** button. Restoring requires **Application policies → Edit** for this application; without that permission, the button is disabled. Closing the history dialog without clicking **Restore** does not change the settings. Restoration changes the current policy; it does not recalculate previously processed messages.
+
 ## Verify the result
 
 After saving the settings, send a test request through the connected application. To inspect triggers, open the record in **Session Analytics**, then use the **Censors** or **Validation configuration** tabs. With a synchronous protected integration, a detected violation can also block the request.
