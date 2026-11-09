@@ -109,11 +109,13 @@ Test both prohibited and acceptable wording. Select **Save** when finished; **Ca
 
 ### Version history and restoration
 
-1. Open **⋮ → Version history** for the policy.
+1. Open **⋮ → History / Versions** for the policy.
 2. Find the required version. Each card shows its number, creation date, author, action, and saved settings. Use **Load more** if the version is not yet displayed.
 3. Compare the saved settings with the version marked **Current Version**.
 4. Click **Restore** beside the required previous version. The action applies immediately; there is no separate confirmation dialog.
 5. Wait for the success notification. The dialog closes and the page refreshes. Check the restored settings and test the policy with a sample message.
+
+![Custom policy version history](../../../../../assets/img/en/policy-version-history-4-4.jpg)
 
 The current version has a label instead of a **Restore** button. Restoring requires **Application policies → Edit** for this application; without that permission, the button is disabled. Closing the history dialog without clicking **Restore** does not change the settings. Restoration changes the current policy; it does not recalculate previously processed messages.
 

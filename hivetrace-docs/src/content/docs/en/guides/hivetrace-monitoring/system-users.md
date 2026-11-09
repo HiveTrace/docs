@@ -63,6 +63,8 @@ After the user is added successfully, the account appears in the table. Access t
 2. Select **Deactivate** for an active account or **Activate** for an inactive one.
 3. Wait for the success notification and check the **Is Active** column.
 
+![System user actions menu](../../../../../assets/img/en/system-user-actions-4-4.jpg)
+
 The action applies immediately, without a separate confirmation dialog. Deactivation prevents the user from accessing the platform but keeps the account and its role assignments. To restore access, activate the account again; the assigned roles still determine which sections are available.
 
 ## Deleting an account
@@ -70,6 +72,8 @@ The action applies immediately, without a separate confirmation dialog. Deactiva
 1. Find the account and open **⋮ → Delete**.
 2. Review the confirmation dialog and click **Delete**. Close the dialog to cancel.
 3. Wait for the success notification and check that the account has disappeared from the table.
+
+![System user deletion confirmation](../../../../../assets/img/en/system-user-delete-confirm-4-4.jpg)
 
 There is no account-restore action on this page. Use **Deactivate** when access only needs to be suspended.
 
