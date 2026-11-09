@@ -74,7 +74,7 @@ To allow a language, select its checkbox; you can choose one language or several
 
 Checks for incoming and outgoing messages are enabled separately.
 
-> **Note:** to switch the request or response check toggle to the active state, at least one language must be selected.
+> **Note:** to save an enabled request or response check, at least one language must be selected. The toggle itself can be activated before selecting a language.
 
 ![Language check - switches](../../../../../assets/img/en/language-switches-4-4.webp)
 
@@ -82,6 +82,6 @@ Checks for incoming and outgoing messages are enabled separately.
 
 The threshold sets the permissible share of letters from other writing systems at which the text is not yet considered a violation. It can be set from `0%` to `100%`: the lower the value, the stricter the check — at 0%, any foreign letter results in a violation. Mixed text is checked against this threshold: as long as the share of foreign letters is not exceeded, no violation is recorded.
 
-The configured threshold can be reset using the `Reset threshold` button or via the toggle. After resetting, the threshold field returns to the default value — `25%`, and the toggle becomes inactive. Click `Save` to apply the changes.
+The configured threshold can be reset using the `Reset threshold` button or via the toggle. After resetting, the toggle becomes inactive and the application-specific tolerance is cleared (`tolerance: null`). The service then uses its configured default. In version 4.4 the disabled slider displays `25%` as a UI placeholder; this is not confirmation of the effective server tolerance. To use exactly 25%, enable the tolerance toggle, set 25%, and save. Click `Save` to apply the changes.
 
 ![Tolerance](../../../../../assets/img/en/language-tolerance-4-4.webp)

@@ -100,7 +100,9 @@ The counter on the button shows the number of patterns in the block; if there ar
 
 ### Blacklist files
 
-The **Blacklist files** block works in the same way, but applies its patterns to the contents of files attached to a request.
+For example, a pattern matching `confidential` detects `confidential.pdf`, but does not search for this word inside `report.pdf`. Use DataClean file processing to detect sensitive data in extracted file contents. Blacklists do not mask file contents.
+
+The **Blacklist files** block works in the same way, but applies its patterns to the **names** of files attached to a request or response.
 
 Select `Add Custom Pattern` to create a rule. A disabled pattern remains saved but is not used during checks.
 
@@ -118,7 +120,7 @@ The **Language check** block allows you to control the language of requests and 
 
 **Allowed languages** — select the required languages using the checkboxes. The following languages are available: `English`, `Arabic`, `Armenian`, `Belarusian`, `Georgian`, `Hebrew`, `Kazakh`, `Russian`, `Turkish`, and `Ukrainian`.
 
-**Tolerance** — a share of letters from other writing systems at which the text is not yet considered a violation. The configured threshold can be reset using the `Reset threshold` button or via the toggle. After resetting, the threshold field returns to the default value — `25%`, and the toggle becomes inactive.
+**Tolerance** — a share of letters from other writing systems at which the text is not yet considered a violation. The configured threshold can be reset using the `Reset threshold` button or via the toggle. After resetting, the toggle becomes inactive and the application-specific tolerance is cleared (`tolerance: null`). The service then uses its configured default. In version 4.4 the disabled slider displays `25%` as a UI placeholder; this is not confirmation of the effective server tolerance. To use exactly 25%, enable the tolerance toggle, set 25%, and save.
 
 ![Profile - language check](../../../../../assets/img/en/profile-create-language-4-4.webp)
 
@@ -155,13 +157,15 @@ Source-storage switches retain both original and cleaned messages for comparison
 
 The **Base Patterns** block contains built-in patterns. They are grouped into subsections, which makes it easier to find the required pattern.
 
-- **Personal data** — `Person name`, `Address`, `Phone number`, `Email`, `Passport details`, `SNILS`;
+- **Personal data** — `Person name`, `Address`, `Phone number`, `Email`, `Passport details`, `SNILS`, `Driver's license`;
 
-- **Banking secrecy** — `Bank card`, `Card security code`;
+- **Banking secrecy** — `Bank card`, `Card security code`, `BIC`, `Correspondent account`, `Bank account number`;
 
 - **Organization details** — `INN`, `KPP`, `OGRN`, `OGRNIP`;
 
-- **Technical data** — `IP address`, `Domain name`, `URL`, `Access token`.
+- **Technical data** — `IP address`, `Domain name`, `URL`, `Access token`;
+
+- **Other** — `License plate`, `VIN`.
 
 The counters show the total number of patterns and how many are enabled for each direction — both across the entire block and within each subsection.
 
@@ -173,7 +177,7 @@ Each card has two switches: **Input** checks user requests and **Output** checks
 
 ## Custom patterns
 
-**Custom patterns** add team-specific regular expressions. 
+**Custom patterns** add team-specific regular expressions.
 
 ![Profile - Custom patterns](../../../../../assets/img/en/profile-create-custom-patterns-4-4.webp)
 
@@ -246,15 +250,15 @@ The page also contains the `Back to profiles` link that leads to the `Profiles` 
 
 By default, the **Applications** panel is open; it can be collapsed. To reopen the panel, click the collapsed panel.
 
-To apply a profile to an application, click `Add application`. The list of available applications opens, from which you can select the required one — it will be linked to the profile and receive its settings. The search field narrows the list. To add all applications at once, click `Add all`.
+To apply a profile to an application, click `Add application`. The list of available applications opens, from which you can select the required one — it will be added to the unsaved selection. Linking and applying settings happen only after saving and confirming the changes. The search field narrows the list. To add all applications at once, click `Add all`.
 
 ![Assigning an application to the profile](../../../../../assets/img/en/profile-assign-application-4-4.webp)
 
-> **Note:** profile changes are applied to the application automatically. If the application's protection settings are manually changed, profile settings are no longer applied to it, and the current settings become individual.
+> **Note:** when saving, profile settings are applied to applications selected in the **Applications** panel. Previously linked applications that are removed from the selection retain their current settings and are detached. Manual changes to an application's protection settings also detach it from the profile.
 
 ### Removing applications from the profile
 
-Applications linked to the profile can be removed from the list: click the cross next to the application to remove a single application, or `Remove all` to clear the list completely.
+Applications linked to the profile can be removed from the list: click the cross next to the application to remove a single application, or `Remove all` to clear the list completely. This changes the unsaved selection. Save and confirm to detach the applications; they keep their existing protection settings.
 
 ![Removing applications from the profile](../../../../../assets/img/en/profile-remove-application-4-4.webp)
 
@@ -268,7 +272,7 @@ The section also displays previously saved settings:
 
 **Blacklist prompts** — blacklist patterns for message text;
 
-**Blacklist files** — blacklist patterns for file contents;
+**Blacklist files** — blacklist patterns for filenames;
 
 **Language check** — allowed languages, request and response checks, tolerance;
 
@@ -280,7 +284,7 @@ The section also displays previously saved settings:
 
 **Allowed patterns** — allowed patterns with direction settings.
 
-By default, all profile blocks are expanded, so the full set of settings is visible. If needed, any block can be collapsed. 
+By default, all profile blocks are expanded, so the full set of settings is visible. If needed, any block can be collapsed.
 
 ### Saving changes
 
@@ -288,4 +292,11 @@ When changes are made to the profile, an information panel appears at the bottom
 
 - **Counter and sections** — information about unsaved sections.
 - **Reset** — discards all unsaved changes.
-- **Save settings** — saves the changes.
+- **Save settings** — starts saving the selected settings and application links.
+
+1. Review the **Applications** panel: only selected applications will receive the saved settings.
+2. Click **Save settings**. If there are currently linked or selected applications, a confirmation dialog opens.
+3. Check the list of changed sections and the notice about detached applications, then click **Save**.
+4. Wait for the success notification. With no linked or selected applications, no confirmation dialog is shown.
+
+If the application links changed while you were editing, the server rejects the save and the page reloads its data. Review the current links before repeating the changes.

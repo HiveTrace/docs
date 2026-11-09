@@ -48,7 +48,7 @@ One can also switch the display to table view, in which data are presented as ro
 
 Regardless of the selected view, the following data are displayed for each application:
 
-- **ID** — unique application identifier. The copy icon next to it copies its value to the clipboard.. 
+- **ID** — unique application identifier. The copy icon next to it copies its value to the clipboard..
 - **Name** — application name; the full text is shown on hover.
 - **Description** — application's purpose; displayed if provided.
 - **Integration type** — `Gateway`, `SDK`, `API` or `Claude Hooks`.
@@ -56,7 +56,7 @@ Regardless of the selected view, the following data are displayed for each appli
 - **Protection** — application's protection status.
 - **Actions menu** — editing and deleting the application.
 
-Application cards additionally display the name of the profile the application is linked to. 
+Application cards additionally display the name of the profile the application is linked to.
 
 Opening an application depends on the selected view:
 
@@ -90,7 +90,7 @@ Gateway routes model traffic through HiveTrace and can stop unsafe requests befo
 - **Synchronous** runs checks before forwarding the request and displays the remaining Gateway controls.
 - **Asynchronous** analyses events without blocking the request; dependent fields are hidden.
 - **Response upon violation** is the required phrase returned instead of a blocked result.
-- **DataClean**, **Custom Policy**, **Guardrail**, **Language Mismatch**, **File Check** switches enable the corresponding checks.
+- **DataClean**, **Custom Policy**, **Guardrail**, **Language Mismatch**, **File Check** switches configure the response to detected violations.
 - **User request** and **LLM response** define the two token limits.
 - **Allowed models** — by default, the model list is empty. An empty list blocks access to every model. To add a model, click `Add model` — a list of available models opens. You can select a model by clicking it in the list or use search — type the name manually to quickly find the required model. To allow all models at once, use the `Add all models` option.
 
@@ -98,7 +98,7 @@ The response upon violation is required only for synchronous Gateway. The value 
 
 ![Create application: Gateway settings](../../../../../assets/img/en/application-create-gateway-settings-4-4.webp)
 
-Each switch controls whether its check runs. A value of `0` in a token-limit field means that no positive threshold is configured; enter a value greater than zero to enforce a limit.
+The integration switches control how detected violations affect the synchronous request. In particular, **Language Mismatch** enables blocking for a language violation, and **File Check** enables blocking for file findings. Turning these off does not disable detection configured under **Protection → Language check** or **Data Cleansing**. Configure the detectors and their input/output directions separately under **Protection**. A value of `0` in a token-limit field means that no positive threshold is configured; enter a value greater than zero to enforce a limit.
 
 ### SDK and API
 
@@ -140,16 +140,16 @@ Open an application by clicking its card or its name, depending on the selected 
   `Blacklists` - message and file blacklists;
 
   `Language check` - the list of allowed languages, check directions, and the threshold of permissible letters from other writing systems;
-  
+
   `Data Cleansing` - built-in, custom, whitelist patterns, processing types and detection depth;
 
-- **Users**:  
+- **Users**:
 
   `User list` - users who have interacted with the application;
 
   `User groups` - the list of groups added to the application;
 
-- **Alerts**:  
+- **Alerts**:
 
   `Communication channels` - notification delivery channels;
 

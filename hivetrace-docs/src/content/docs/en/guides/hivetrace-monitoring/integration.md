@@ -60,7 +60,7 @@ There are 4 options available: **Gateway**, **SDK**, **API**, **Claude Code Hook
 This block determines how a message is processed during checks.
 
 - **Synchronous** — message is checked within the request, and the result is returned in the response;
-- **Asynchronous** — message is accepted immediately (HTTP 202) and checked later; the result is not returned to the client.
+- **Asynchronous** — Monitoring accepts the message with HTTP 202 and checks it later when deferred ingest is enabled (the default). This receipt is not a check result. For Gateway integrations, HTTP 202 describes the Gateway-to-Monitoring exchange; the client still receives the model response from Gateway.
 
 ![Operation Mode](../../../../../assets/img/en/integration-operation-mode-4-4.webp)
 
@@ -71,7 +71,7 @@ Gateway routes model traffic through HiveTrace and can stop unsafe requests befo
 - **Synchronous** runs checks before forwarding the request and displays the remaining Gateway controls.
 - **Asynchronous** analyses events without blocking the request; dependent fields are hidden.
 - **Response upon violation** is the required phrase returned instead of a blocked result.
-- **DataClean**, **Custom Policy**, **Guardrail**, **Language Mismatch**, **File Check** switches enable the corresponding checks.
+- **DataClean**, **Custom Policy**, **Guardrail**, **Language Mismatch**, **File Check** switches configure the response to detected violations.
 - **User request** and **LLM response** define the two token limits.
 - **Allowed models** — by default, the model list is empty. An empty list blocks access to every model. To add a model, click `Add model` — a list of available models opens. You can select a model by clicking it in the list or use search — type the name manually to quickly find the required model. To allow all models at once, use the `Add all models` option.
 
@@ -79,7 +79,7 @@ The response upon violation is required only for synchronous Gateway. The value 
 
 ![Integration: Gateway settings](../../../../../assets/img/en/integration-create-gateway-settings-4-4.webp)
 
-Each switch controls whether its check runs. A value of `0` in a token-limit field means that no positive threshold is configured; enter a value greater than zero to enforce a limit.
+The integration switches control how detected violations affect the synchronous request. In particular, **Language Mismatch** enables blocking for a language violation, and **File Check** enables blocking for file findings. Turning these off does not disable detection configured under **Protection → Language check** or **Data Cleansing**. Configure the detectors and their input/output directions separately under **Protection**. A value of `0` in a token-limit field means that no positive threshold is configured; enter a value greater than zero to enforce a limit.
 
 ### SDK and API
 

@@ -5,7 +5,7 @@ sidebar:
   order: 6
 ---
 
-HiveTrace supports blacklists — regex patterns for blocking or masking matching content; when one is detected, the message is automatically marked as a violation. Blacklists are configured separately for messages and files.
+HiveTrace supports blacklists — regex patterns for detecting matching messages or filenames; when one is detected, the message is automatically marked as a violation. Blacklists are configured separately for messages and files.
 
 ## Required permissions
 
@@ -74,7 +74,9 @@ Select **Add pattern** to create a rule. A disabled pattern remains saved but is
 
 ## Blacklist files
 
-The **Blacklist files** section works in the same way, but applies its patterns to the contents of files attached to a request. Individual rules can be enabled or disabled, inspected, edited, or deleted.
+For example, a pattern matching `confidential` detects `confidential.pdf`, but does not search for this word inside `report.pdf`. Use DataClean file processing to detect sensitive data in extracted file contents. Blacklists do not mask file contents.
+
+The **Blacklist files** section works in the same way, but applies its patterns to the **names** of files attached to a request or response. Individual rules can be enabled or disabled, inspected, edited, or deleted.
 
 ![Blacklist files](../../../../../assets/img/en/blacklists-file-blacklist-4-4.webp)
 

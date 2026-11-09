@@ -65,18 +65,27 @@ This action cannot be undone. Prior to deletion, please verify that integration 
 | Field | Type | Description |
 |---|---|---|
 | `application_id` | `string` (UUID) | Application ID |
-| `name` | `string` (UUID) | Source name |
+| `name` | `string` | Source name |
 
 ## Example
 
 ```json
 {
     "application_id": "{{application_id}}",
-    "name": "OpenWebUI"  
+    "name": "OpenWebUI"
 }
 ```
 
-## Automatic user group creation
+### Source credentials
+
+A successful source creation returns HTTP 201 with `id`, `application_id`, `name`, and `token`. Use `id` as `source_id` and `token` as the Bearer token for directory synchronization. This is a separate source token, not the operator access token or an SDK API token. Save it securely: listing sources does not return the token. If it is lost, an operator with source-edit permission can call `POST /api/integration-sources/{source_id}/rotate-token` and update the integration with the new token.
+
+## Full user-directory synchronization
+
+Send the complete current directory for this source on every update. This endpoint reconciles users, groups, and memberships; it is not an append operation.
+
+**Users and groups missing from the new snapshot are removed from this source's active directory, and memberships are rebuilt from the snapshot.** Other sources are not affected. Do not send only a newly created group or a single changed user. Existing session history is not deleted by this operation.
+
 
 ### Method and path
 
@@ -97,9 +106,17 @@ This action cannot be undone. Prior to deletion, please verify that integration 
 | `application_id` | `string` (UUID) | ID of the application the data is synchronized to |
 | `source_id` | `string` (UUID) | Source ID |
 | `revision` | `integer` | Synchronization revision number; incremented on each directory update |
-| `complete` | `boolean` | Snapshot completeness flag: `true` — a full directory snapshot is passed |
+| `complete` | `true` | Required literal `true`; partial snapshots (`false`) are rejected |
 | `users` | `array` | List of users |
 | `groups` | `array` | List of user groups |
+
+### Snapshot validation and revisions
+
+- `revision` is a positive integer. Increment it whenever the snapshot changes.
+- Repeating the same revision with the same content returns `unchanged: true`. An older revision or different content at the same revision returns HTTP 409.
+- User IDs and group IDs must be unique within their lists. Every `user_ids` entry must occur in `users`; duplicate members in a group are rejected.
+- Limits: 100,000 users, 20,000 groups, 100,000 members per group, and 500,000 memberships in the whole snapshot.
+- `complete: false`, missing members, and invalid fields produce validation errors (HTTP 422). The source token must match both `source_id` and `application_id`.
 
 ### User object (`users[]`)
 
