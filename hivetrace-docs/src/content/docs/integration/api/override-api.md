@@ -6,13 +6,13 @@ sidebar:
 
 ## Override-эндпоинты
 
-### `POST /process_request/override/`
+### `POST /process_request/override`
 
 Для валидации **входящих сообщений пользователя** до их передачи в LLM, когда правила проверки необходимо задать прямо в запросе, а не через настройки Web UI.
 
 ---
 
-### `POST /process_response/override/`
+### `POST /process_response/override`
 
 Для валидации **исходящих ответов LLM** перед их возвратом конечному пользователю, с конфигурацией проверки непосредственно в запросе.
 
@@ -22,7 +22,7 @@ Override-эндпоинты позволяют задавать параметр
 
 - Настройки валидации из Web UI **не применяются**
 - Валидация полностью управляется через `validation_config`
-- Соответствующие сервисы (**dataclean, guardrails, custom**) должны быть включены на уровне развертывания
+- Соответствующие сервисы (**dataclean, guardrails, custom, language check**) должны быть включены на уровне развертывания
 
 ---
 
@@ -44,9 +44,27 @@ Override-эндпоинты позволяют задавать параметр
 | ----------------------- | -------- | -------------------------------------------------- |
 | `additional_parameters` | `object` | Метаданные для отслеживания сессии и пользователя. |
 
+> **Примечание:** для псевдонимизации и обратной замены требуется `additional_parameters.session_id`.
+
 ---
 
 ## Inline-валидация (`validation_config`)
+
+### Направление запроса и ответа
+
+У эндпоинтов разные схемы:
+
+| Настройка | `/process_request/override` | `/process_response/override` |
+|---|---|---|
+| Модельные пользовательские политики: `custom.policies`, `custom.message.model` | Поддерживаются | Не принимаются |
+| Чёрные списки сообщений и имён файлов | Поддерживаются | Поддерживаются |
+| `dataclean.enable_depseudonymization` | Не принимается | Поддерживается |
+
+Поле, переданное не в тот эндпоинт, вызывает ошибку валидации (HTTP 422). Первый пример ниже предназначен для **`/process_request/override`**, пример депсевдонимизации — для **`/process_response/override`**.
+
+Override меняет правила валидации, но не область API-токена, глобальные переключатели модулей и режим приложения `sync`/`async`. При отложенной обработке возвращается HTTP 202 с `status: "accepted"`, как описано в [Base API](../base-api/).
+
+
 
 Определяет правила проверки непосредственно внутри запроса.
 
@@ -54,35 +72,43 @@ Override-эндпоинты позволяют задавать параметр
 
 ```json
 {
-	"application_id": "{{application_id}}",
-	"message": "My name is John, my CVC is 222, and I own a car.",
-	"additional_parameters": {
-		"session_id": "{{client_session_id}}",
-		"user_id": "{{client_user_id}}"
-	},
-	"validation_config": {
-		"source": "inline",
-		"inline": {
-			"guardrails": { "enabled": true },
-			"custom": {
-				"enabled": true,
-				"policies": [
-					{
-						"name": "medicine",
-						"prompt": "Do not provide medical advice or discuss medical topics."
-					}
-				]
-			},
-			"dataclean": {
-				"enabled": true,
-				"clean_type": "masking",
-				"patterns": ["CVC", { "name": "AUTOMOBILE", "regex": "\\bcar\\b" }]
-			}
-		}
-	}
+  "application_id": "{{application_id}}",
+  "message": "Меня зовут Иван, мой CVC 222, и у меня есть машина.",
+  "additional_parameters": {
+    "session_id": "{{client_session_id}}",
+    "user_id": "{{client_user_id}}"
+  },
+  "validation_config": {
+    "source": "inline",
+    "inline": {
+      "guardrails": {
+        "enabled": true
+      },
+      "custom": {
+        "enabled": true,
+        "policies": [
+          {
+            "name": "медицина",
+            "prompt": "Не обсуждай медицинские темы."
+          }
+        ]
+      },
+      "dataclean": {
+        "enabled": true,
+        "clean_type": "pseudonymization",
+        "patterns": [
+          "CVC",
+          {
+            "name": "АВТОМОБИЛЬ",
+            "regex": "(?<![А-Яа-яЁё])машина(?![А-Яа-яЁё])",
+            "pseudonym": "машина"
+          }
+        ]
+      }
+    }
+  }
 }
 ```
-
 ---
 
 ### `dataclean.patterns`: разрешенные значения
@@ -92,43 +118,255 @@ Override-эндпоинты позволяют задавать параметр
 - строкой с именем предопределённого паттерна
 - объектом с кастомным паттерном `{ "name": "...", "regex": "..." }`
 
+> **Примечание:** Если выбрана псевдонимизация в качестве типа обработки, то для объектов с кастомным паттерном необходимо указать `pseudonym`.
+
 Разрешённые значения для **предопределенных** паттернов:
 
 | Паттерн            | Описание                     |
 | ------------------ | ---------------------------- |
 | `ADDRESS`          | Адрес                        |
+| `BANK_ACCOUNT_NUMBER`| Номер расчётного счёта     |
 | `BANK_CARD_NUMBER` | Номер банковской карты       |
-| `COMPANY`          | Компания / организация       |
+| `BIC`              | БИК                          |
+| `CORRESPONDENT_ACCOUNT` | Номер корреспондентского счёта |
 | `CVC`              | CVC/CVV код банковской карты |
-| `DATE`             | Дата                         |
-| `DEADLINE_DATE`    | Дата дедлайна / срок (дата)  |
-| `DIAGNOSIS`        | Диагноз                      |
 | `DOMAIN`           | Домен                        |
-| `DURATION`         | Длительность / период        |
-| `EMAILS`           | Email-адреса                 |
+| `DRIVER_LICENSE`   | Номер водительского удостоверения |
+| `EMAIL`            | Email-адрес                  |
 | `INN`              | ИНН                          |
 | `IP`               | IP-адрес                     |
-| `JOB_ROLE`         | Должность / роль             |
 | `KPP`              | КПП                          |
-| `MONEY`            | Денежные суммы               |
+| `LICENSE_PLATE`    | Госномер авто                |
 | `NAME`             | Имя (ФИО)                    |
 | `OGRN`             | ОГРН                         |
 | `OGRNIP`           | ОГРНИП                       |
 | `PASSPORT_NUMBER`  | Номер паспорта               |
 | `PHONE_NUMBER`     | Номер телефона               |
 | `SNILS`            | СНИЛС                        |
+| `TOKEN`            | Токен доступа                |
+| `URL`              | Ссылка                       |
+| `VIN`              | Идентификационный номер транспортных средств |
 
 ---
 
-### `dataclean.clean_type` (masking type): разрешённые значения
+### `dataclean.whitelist`: исключения
 
-| Masking type | Описание                                                       |
-| ------------ | -------------------------------------------------------------- |
-| `MASKING`    | Маскирование: заменяет найденные значения маской               |
-| `DELETION`   | Удаление: удаляет найденные значения из текста                 |
-| `DETECTION`  | Детекция: только обнаруживает совпадения, без изменения текста |
+`patterns` — список исключений модуля очистки персональных данных. Их следует применять, когда строка похожа на конфиденциальные данные, но допустима в вашем сценарии.
+
+Элемент списка должен быть объект с кастомным паттерном `{ "name": "...", "value": "..." }`
+
+### Пример
+
+```json
+{
+  "application_id": "{{application_id}}",
+  "message": "Не получается перейти по адресу дети.рф",
+  "additional_parameters": {
+    "user_id": "{{client_user_id}}",
+    "session_id": "{{client_session_id}}"
+  },
+  "validation_config": {
+    "source": "inline",
+    "inline": {
+      "dataclean": {
+        "enabled": true,
+        "clean_type": "masking",
+        "patterns": [
+          "DOMAIN"
+        ],
+        "whitelist": {
+          "patterns": [
+            {
+              "name": "кириллический домен",
+              "value": "(?i)\\b(?:[а-яёА-ЯЁ0-9-]+\\.)+(?:рф|бел|сайт|онлайн|дети)(?![а-яёА-ЯЁ0-9])"
+            }
+          ]
+        }
+      },
+      "guardrails": {
+        "enabled": false
+      },
+      "custom": {
+        "enabled": false
+      }
+    }
+  }
+}
+```
 
 ---
+
+### `dataclean.clean_type` (тип обработки): разрешённые значения
+
+| Тип обработки | Описание                                                       |
+| --------------| -------------------------------------------------------------- |
+| `MASKING`     | Маскирование: заменяет найденные значения маской               |
+| `DELETION`    | Удаление: удаляет найденные значения из текста                 |
+| `DETECTION`   | Детекция: только обнаруживает совпадения, без изменения текста |
+| `PSEUDONYMIZATION` | Псевдонимизация: заменяет значение устойчивой меткой типа `NAME_1` |
+
+---
+
+### `dataclean.enable_depseudonymization`: депсевдонимизация
+
+Можно депсевдонимизировать данные в рамках сессии.
+
+
+Следующий пример отправляется в `/process_response/override`. Сначала выполните псевдонимизацию запроса с теми же `application_id` и `additional_parameters.session_id`, чтобы в словаре сессии появились значения для обратной замены.
+
+### Пример
+
+```json
+{
+  "application_id": "{{application_id}}",
+  "message": "Мой КПП - 771301001. KPP_1",
+  "additional_parameters": {
+    "user_id": "{{client_user_id}}",
+    "session_id": "{{client_session_id}}"
+  },
+  "validation_config": {
+    "source": "inline",
+    "inline": {
+      "dataclean": {
+        "enabled": true,
+        "clean_type": "pseudonymization",
+        "patterns": [
+          "KPP"
+        ],
+        "enable_depseudonymization": true
+      },
+      "guardrails": {
+        "enabled": false
+      },
+      "custom": {
+        "enabled": false
+      }
+    }
+  }
+}
+```
+---
+
+### `custom.message.blacklist`: паттерны для чёрного списка сообщений
+
+`patterns` — паттерны из этого списка применяются к тексту сообщений. 
+
+Элемент списка должен быть объект с кастомным паттерном `{ "name": "...", "pattern": "..." }`
+
+### Пример
+
+```json
+{
+  "application_id": "{{application_id}}",
+  "message": "Как оплатить товары по просроченной карте?",
+  "additional_parameters": {
+    "user_id": "{{client_user_id}}",
+    "session_id": "{{client_session_id}}"
+  },
+  "validation_config": {
+    "source": "inline",
+    "inline": {
+      "custom": {
+        "enabled": true,
+        "message": {
+          "blacklist": {
+            "patterns": [
+              {
+                "name": "card",
+                "pattern": "\\b[Кк]арт\\w*"
+              }
+            ]
+          }
+        }
+      },
+      "guardrails": {
+        "enabled": false
+      }
+    }
+  }
+}
+```
+
+### `custom.file.blacklist`: паттерны для чёрного списка файлов
+
+`patterns` — паттерны из этого списка применяются к **именам** вложенных файлов, а не к их содержимому. Проверка извлечённого содержимого выполняется обработкой файлов DataClean.
+
+Элемент списка должен быть объект с кастомным паттерном `{ "name": "...", "pattern": "..." }`
+
+### Пример
+
+```json
+{
+  "application_id": "{{application_id}}",
+  "message": "Как использовать кэшбек?",
+  "additional_parameters": {
+    "user_id": "{{client_user_id}}",
+    "session_id": "{{client_session_id}}"
+  },
+  "validation_config": {
+    "source": "inline",
+    "inline": {
+      "custom": {
+        "enabled": true,
+        "file": {
+          "blacklist": {
+            "patterns": [
+              {
+                "name": "FILE_PATTERN",
+                "pattern": "\\b[Кк]арт\\w*"
+              }
+            ]
+          }
+        }
+      },
+      "guardrails": {
+        "enabled": false
+      }
+    }
+  }
+}
+```
+
+### `language`: проверка языка
+
+`allowed_langs` — список разрешённых языков, который задаётся набором кодов: `en`, `ar`, `hy`, `be`, `ka`, `he`, `kk`, `ru`, `tr`, `uk`. Можно указать один язык или несколько — вплоть до всех. Текст на языке, которого нет в списке, может считаться нарушением (с учётом порога допустимых букв из других систем письма).
+
+`enforce` задаёт, нужно ли применять блокировку при обнаружении несоответствия языка (`true`) или только фиксировать результат (`false`). Это входная настройка; результат возвращается в `language.enforced`.
+
+`tolerance` - задаёт допустимую долю букв из других систем письма, при которой текст ещё не считается нарушением. Можно указать от 0 до 1.
+
+### Пример
+
+```json
+{
+  "application_id": "{{application_id}}",
+  "message": "За что списание по карте за неделю, подскажите, пожалуйста. p.s. за последние 3 дня",
+  "additional_parameters": {
+    "user_id": "{{client_user_id}}",
+    "session_id": "{{client_session_id}}"
+  },
+  "validation_config": {
+    "source": "inline",
+    "inline": {
+      "language": {
+        "enabled": true,
+        "allowed_langs": [
+          "ru",
+          "en"
+        ],
+        "enforce": false,
+        "tolerance": 0.01
+      },
+      "guardrails": {
+        "enabled": false
+      },
+      "custom": {
+        "enabled": false
+      }
+    }
+  }
+}
+```
 
 ## Схема ответа
 

@@ -4,472 +4,222 @@ sidebar:
   order: 1
 ---
 
-**Document version:** for gateway 4.1.0
+This guide describes the **Gateway 4.4 release branch** contract. Gateway accepts client requests, checks model access, sends messages to Monitoring, and calls the provider directly or through LiteLLM.
 
-**Audience:** engineering and platform teams integrating HiveTrace Gateway into a production environment.
+## 1. Preparation
 
-This document describes the contract between the client application and the gateway: request and response formats, the error handling model, and streaming behavior. The guide is intended for practical implementation and operation of the integration.
+1. Create a HiveTrace application with the **Gateway** integration.
+2. Configure protection, `sync` or `async` mode, and allowed models. **An empty allowed-model list denies every model call.**
+3. Issue an API token for this application.
+4. Obtain the Gateway URL and an available model name. Examples use the placeholder alias `chat-model`; replace it with a configured model allowed for your application.
+5. For LiteLLM routing, obtain a separate LiteLLM key. For direct routing, the Gateway administrator configures the provider and its credentials.
 
----
+In these examples, `GATEWAY_URL` includes `/v1`, for example `https://gateway.example.com/v1`. The running Gateway exposes `/docs`, `/redoc`, and `/openapi.json` relative to the service root.
 
-## 1. Purpose and Place in the Architecture
+## 2. Authentication and application identity
 
-HiveTrace Gateway is an OpenAI-compatible HTTP proxy placed between the client application and the LLM provider (OpenAI, Anthropic OpenAI-compatible endpoints, LiteLLM, vLLM, Ollama in OpenAI mode, and others). For each request, the following sequence is performed:
+The client sends a **HiveTrace key**, not a provider key:
 
-1. The gateway receives it as a regular OpenAI call.
-2. It is registered in HiveTrace before being sent to the LLM.
-3. It is proxied to the upstream.
-4. It is registered in HiveTrace after the response is received.
-
-With the appropriate policy, HiveTrace can **reject** a request or **replace** the model response with a predefined message. This is only possible in synchronous mode, when data is delivered to HiveTrace monitoring for analysis synchronously.
-
-```
-┌────────────┐     ┌──────────────────┐     ┌────────────┐
-│   Client   │────▶│  HiveTrace       │────▶│  Upstream  │
-│            │     │  Gateway :4100   │     │ (LiteLLM,  │
-│            │◀────│                  │◀────│  vLLM, …)  │
-└────────────┘     └────────┬─────────┘     └────────────┘
-                            │
-                            ▼
-                    ┌──────────────┐
-                    │  HiveTrace   │
-                    │  Monitoring  │
-                    └──────────────┘
+```http
+Authorization: Bearer <hivetrace-api-token>
 ```
 
-### 1.1. OpenAI Compatibility
+Gateway validates the key against Monitoring's signed access-policy directory. The directory associates a key with an application, allowed models, and user-directory sources. The key determines the application; `X-Application-Id` and the `HIVETRACE_APPLICATION_ID` environment variable do not select an application in this contract.
 
-The API matches OpenAI Chat Completions, Embeddings, and Models: the request body format, response shape, SSE streaming, and error envelope are identical to OpenAI. The request body is not modified when forwarded to the upstream, with one exception: `stream: true` is forcibly rewritten to `false` when `app_mode=sync`; see section 6.3.2.
+For an OpenAI client, pass the HiveTrace key as `api_key`. For other clients, ensure it is sent as `Authorization: Bearer`. The legacy `X-HiveTrace-Api-Key` header does not replace `Authorization`.
 
-Additional values required for monitoring analytics (`application_id`, `user_id`, `session_id`) are passed to the gateway through HTTP headers. They are not forwarded to the upstream and do not affect the model response. See section 4 for the full list.
+| Result | Cause |
+|---|---|
+| HTTP 401 | Missing key or key unknown to the directory |
+| HTTP 403 | Model or supplied directory source not allowed for the application |
+| HTTP 503 | No usable, verified access-policy directory available |
 
-The `X-HiveTrace-Api-Key` header is required for all requests to the gateway. In the OpenAI SDK, it is set through `default_headers`; see the example in section 5.1.
+Gateway does not call the model until authorization succeeds. The same key authenticates telemetry requests to Monitoring; the client's HiveTrace key is not forwarded as the provider's `Authorization`.
 
-### 1.2. OpenAPI Specification
+## 3. Provider routing
 
-The API contract is available in OpenAPI 3.1 format:
+| Client request | Route | Upstream credential |
+|---|---|---|
+| Nonempty `X-LiteLLM-Api-Key` | Configured LiteLLM upstream | Header value becomes the outgoing `Authorization: Bearer` |
+| No `X-LiteLLM-Api-Key` | Direct routing using `GATEWAY_MODEL_CONFIG` | Gateway configuration: Bearer for an OpenAI-compatible provider or `x-api-key` for Anthropic |
 
-- Snapshot: [`openapi.json`](./openapi.json).
-- On a running gateway instance: `GET /openapi.json`, Swagger UI at `/docs`, ReDoc at `/redoc`.
+Putting a LiteLLM key in `Authorization` does not select LiteLLM routing: Gateway treats it as a HiveTrace key. If direct routing is not configured, a request without `X-LiteLLM-Api-Key` fails. In direct mode, Gateway may replace the public model alias with the provider model name and add configured model parameters.
 
----
+## 4. Headers
 
-## 2. Endpoints
+| Header | Purpose |
+|---|---|
+| `Authorization: Bearer <hivetrace-api-token>` | Required HiveTrace application key |
+| `X-LiteLLM-Api-Key` | Optional key selecting the LiteLLM route |
+| `X-User-Id` | External user ID for analytics |
+| `X-Session-Id` | External session ID; keep it stable across a conversation for consistent pseudonymization |
+| `X-Source-Id` | Directory source for a user from a synchronized directory; must be allowed for the application |
+| `X-HiveTrace-Skip-System-Requests` | Overrides skipping of service requests in telemetry (`true`/`false`); does not switch `sync`/`async` |
+| `X-Model-Name` | Selects the model/provider for Files API when the target provider is ambiguous |
+| `anthropic-version`, `anthropic-beta` | Anthropic protocol headers for the relevant operations |
 
-The gateway provides a single entry point (`:4100` by default) and implements three OpenAI-compatible endpoints:
+Set `sync`/`async` in application settings. Do not use the client header `X-HiveTrace-Mode` to switch modes.
 
-| Method | Path                   | Purpose                                                                 | HiveTrace pipeline                              |
-| ------ | ---------------------- | ----------------------------------------------------------------------- | ----------------------------------------------- |
-| `POST` | `/v1/chat/completions` | Chat completion. `stream: true` is supported for async monitoring mode. | **Full** (pre-call + post-call + error logging) |
-| `POST` | `/v1/embeddings`       | Embeddings.                                                             | **Not applied** - transparent proxying          |
-| `GET`  | `/v1/models`           | List of upstream models.                                                | **Not applied** - transparent proxying          |
+## 5. Endpoints and examples
 
-The full HiveTrace policy check path is available for `chat/completions`.
+| Method | Path | Processing |
+|---|---|---|
+| POST | `/v1/chat/completions` | OpenAI Chat Completions, checks before and after the model |
+| POST | `/v1/responses` | OpenAI Responses, checks before and after the model |
+| POST | `/v1/messages` | Anthropic Messages, checks before and after the model |
+| POST | `/v1/embeddings` | Proxying with model authorization, without the full message-analysis pipeline |
+| GET | `/v1/models` | Models from LiteLLM or Gateway's local registry, depending on the route |
+| POST / GET | `/v1/files` | Upload / list files |
+| GET / DELETE | `/v1/files/{id}` | Get metadata / delete a file |
+| GET | `/v1/files/{id}/content` | Check and download file contents |
 
----
+A model appearing in `/v1/models` does not replace authorization: calling it must still be allowed for the application. The selected provider and model must support the API format being used.
 
-## 3. Authentication
-
-The gateway uses a **two-level** authorization model:
-
-### 3.1. Client -> Gateway
-
-The client sends the `X-HiveTrace-Api-Key: <gateway-key>` header, which is the **required** access key for the gateway. Without it, any request to any endpoint (`/v1/chat/completions`, `/v1/embeddings`, `/v1/models`) is rejected with status `401 invalid_request_error`. The gateway uses the same key to authenticate to HiveTrace for outgoing calls, so changing the client key automatically changes the gateway identity in HiveTrace. The **server token in env is not used and has been removed**.
-
-### 3.2. Client -> Gateway -> Upstream
-
-The client sends the `Authorization: Bearer <key>` header. **The gateway does not validate or store this token**; it is passed to the upstream unchanged. This means:
-
-- `<key>` must be a valid **upstream** key, such as an OpenAI API key for direct calls to OpenAI or a LiteLLM key.
-
-### 3.3. Applications
-
-The application is identified by the `X-Application-Id` header; see section 4. This allows one gateway instance to serve multiple applications with **different HiveTrace policies** without changing infrastructure configuration.
-
----
-
-## 4. Request Headers
-
-The "Source" column indicates whether the header belongs to the OpenAI standard (proxied to the upstream without gateway interpretation) or is a gateway extension (processed by the gateway and not forwarded to the upstream).
-
-| Header                           | Source  | Requiredness            | Purpose                                                                                                                              |
-| -------------------------------- | ------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `Authorization: Bearer <key>`    | OpenAI  | for upstream            | Upstream key. Passed to the upstream without modification or validation.                                                             |
-| `Content-Type: application/json` | OpenAI  | for non-stream requests | Standard for the OpenAI API.                                                                                                         |
-| `Accept: text/event-stream`      | OpenAI  | for stream requests     | Standard for OpenAI streaming.                                                                                                       |
-| `X-HiveTrace-Api-Key`            | Gateway | **yes**                 | Gateway access key. Also used as the Bearer token for outgoing gateway -> HiveTrace calls. Missing or empty value -> `401`.          |
-| `X-Application-Id`               | Gateway | no                      | Application UUID in HiveTrace. Determines the per-app policy. If missing, falls back to the `HIVETRACE_APPLICATION_ID` env variable. |
-| `X-User-Id`                      | Gateway | no                      | End-user identifier for audit.                                                                                                       |
-| `X-Session-Id`                   | Gateway | no                      | User session identifier.                                                                                                             |
-| `X-Attached-Files`               | Gateway | no                      | JSON array of attachment descriptors for a separate audit copy in HiveTrace. Format: section 5.3.2.                                  |
-
----
-
-## 5. Request Format
-
-The request body matches the OpenAI Chat Completions / Embeddings payload. There are no gateway-specific fields in the body.
-
-### 5.1. HTTP Examples
-
-Minimal request:
+### Chat Completions through LiteLLM
 
 ```bash
-curl -X POST http://gateway:4100/v1/chat/completions \
-  -H "Authorization: Bearer <upstream-key>" \
-  -H "X-HiveTrace-Api-Key: <gateway-key>" \
+curl -sS "$GATEWAY_URL/chat/completions" \
+  -H "Authorization: Bearer $HIVETRACE_API_KEY" \
+  -H "X-LiteLLM-Api-Key: $LITELLM_API_KEY" \
+  -H "X-User-Id: user-123" \
+  -H "X-Session-Id: session-456" \
   -H "Content-Type: application/json" \
-  -H "X-Application-Id: 11111111-2222-3333-4444-555555555555" \
-  -d '{
-    "model": "gpt-5",
-    "messages": [{"role": "user", "content": "Hello!"}]
-  }'
+  -d '{"model":"chat-model","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-With user and session identification:
+For direct routing, remove the `X-LiteLLM-Api-Key` line; the model must exist in Gateway configuration.
+
+```python
+import os
+from openai import OpenAI
+
+headers = {"X-User-Id": "user-123", "X-Session-Id": "session-456"}
+if os.getenv("LITELLM_API_KEY"):
+    headers["X-LiteLLM-Api-Key"] = os.environ["LITELLM_API_KEY"]
+
+with OpenAI(
+    base_url=os.environ["GATEWAY_URL"].rstrip("/"),
+    api_key=os.environ["HIVETRACE_API_KEY"],
+    default_headers=headers,
+) as client:
+    response = client.chat.completions.create(
+        model=os.environ["MODEL_NAME"],
+        messages=[{"role": "user", "content": "Hello!"}],
+    )
+    print(response.choices[0].message.content)
+```
+
+### OpenAI Responses
 
 ```bash
-curl -X POST http://gateway:4100/v1/chat/completions \
-  -H "Authorization: Bearer <upstream-key>" \
-  -H "X-HiveTrace-Api-Key: <gateway-key>" \
+curl -sS "$GATEWAY_URL/responses" \
+  -H "Authorization: Bearer $HIVETRACE_API_KEY" \
+  -H "X-LiteLLM-Api-Key: $LITELLM_API_KEY" \
+  -H "X-Session-Id: session-456" \
   -H "Content-Type: application/json" \
-  -H "X-Application-Id: 11111111-…" \
-  -H "X-User-Id: alice@company.com" \
-  -H "X-Session-Id: session-2025-04-28-abc" \
-  -d '{ "model": "gpt-5", "messages": [...] }'
+  -d '{"model":"chat-model","input":"Briefly explain the result."}'
 ```
 
-Streaming:
+### Anthropic Messages
+
+This direct-routing example uses `claude-model`, which must be a configured Anthropic model alias. Gateway obtains provider credentials from its configuration.
 
 ```bash
-curl -X POST http://gateway:4100/v1/chat/completions \
-  -H "Authorization: Bearer <upstream-key>" \
-  -H "X-HiveTrace-Api-Key: <gateway-key>" \
+curl -sS "$GATEWAY_URL/messages" \
+  -H "Authorization: Bearer $HIVETRACE_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
   -H "Content-Type: application/json" \
-  -H "Accept: text/event-stream" \
-  -d '{ "model": "gpt-5", "stream": true, "messages": [...] }'
+  -d '{"model":"claude-model","max_tokens":256,"messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-### 5.3. File Transfer
+For LiteLLM routing, add `X-LiteLLM-Api-Key` and use a model configured on the corresponding LiteLLM route.
 
-File transfer is supported through two strategies. They solve different tasks and can be used separately or together.
+## 6. Files
 
-| Strategy                                   | File reaches the LLM | File reaches HiveTrace (audit) | OpenAI client changes |
-| ------------------------------------------ | -------------------- | ------------------------------ | --------------------- |
-| 5.3.1. OpenAI standard (multimodal)        | Yes                  | No                             | Not required          |
-| 5.3.2. `X-Attached-Files` header           | No                   | Yes                            | One additional header |
-| 5.3.3. Both strategies in a single request | Yes                  | Yes                            | One additional header |
+Send files in the standard request body. Gateway extracts an audit copy from supported file parts; a separate file header is unnecessary.
 
-#### 5.3.1. Strategy 1 - OpenAI Standard (Multimodal `messages[].content`)
+| Format | File parts |
+|---|---|
+| Chat Completions | `file` / `image_url` in `messages[].content` |
+| Responses | `input_file` / `input_image` in `input[]` |
+| Anthropic Messages | `document` / `image` in `content` |
 
-Files are passed using the standard OpenAI method: an array of parts in `messages[].content`. The gateway does not interpret these parts and forwards the request body to the upstream unchanged.
+Depending on the format, use base64/data URLs, absolute HTTP(S) URLs, or `file_id`. Auditing a `file_id` requires Gateway to have the previously uploaded bytes available through its upload cache. Whether the model can read the file depends on the provider and model.
+
+### Multipart
+
+Chat Completions and Responses also accept `multipart/form-data`: JSON in a `request` part and files in repeated `attached_files` parts. Gateway adds the files to the last user message and sends the provider the regular body for the selected API. Anthropic Messages does not accept this multipart transport.
 
 ```bash
-curl -X POST http://gateway:4100/v1/chat/completions \
-  -H "Authorization: Bearer <upstream-key>" \
-  -H "X-HiveTrace-Api-Key: <gateway-key>" \
-  -H "Content-Type: application/json" \
-  -H "X-Application-Id: <APPLICATION_ID>" \
-  -d '{
-    "model": "gpt-5",
-    "messages": [{
-      "role": "user",
-      "content": [
-        {"type": "text", "text": "What is in the image?"},
-        {"type": "image_url", "image_url": {"url": "data:image/png;base64,iVBORw0KG..."}}
-      ]
-    }]
-  }'
+curl -sS "$GATEWAY_URL/chat/completions" \
+  -H "Authorization: Bearer $HIVETRACE_API_KEY" \
+  -H "X-LiteLLM-Api-Key: $LITELLM_API_KEY" \
+  -F 'request={"model":"chat-model","messages":[{"role":"user","content":"Summarize the document."}]};type=application/json' \
+  -F 'attached_files=@contract.pdf;type=application/pdf'
 ```
 
-Behavior:
+### Audit only
 
-- **LLM.** Receives the request in the standard OpenAI multimodal format. Processing of `image_url`, `file`, and other non-text parts depends on the model and upstream.
-- **HiveTrace.** Only the text part (`type: "text"`) is written to the `user_prompt` record. The contents of `image_url`, `file`, and other non-text parts are not stored in HiveTrace.
-- **Client changes.** Not required. Any OpenAI client or SDK with multimodal support works without changes.
+For a document processed by the client that should not be sent to the model in full, use `metadata.files` in the JSON body. An item may contain `name`, `type`, and an absolute `url` or `content_base64`. This is a separate audit channel, not a model-facing file part. The legacy `X-Attached-Files` header is no longer a way to submit attachments.
 
-Use this when the file must be processed by the model without saving an audit copy of the file in HiveTrace.
+For clients repeating the file list on every turn, `metadata.request_id` and `file.request_id` distinguish new attachments from previous-turn files. `metadata.attachments` and `metadata.attached_files` do not replace `metadata.files`.
 
-#### 5.3.2. Strategy 2 - `X-Attached-Files` Extension
+### Files API
 
-Files are passed in the `X-Attached-Files` header as a JSON array of descriptors. The gateway does not forward this header to the upstream; instead, it downloads or decodes the files and attaches them to the `user_prompt` audit record in HiveTrace.
+`/v1/files` supports OpenAI and Anthropic forms. For Anthropic, send the appropriate `anthropic-beta: files-api-…` header; OpenAI uploads use `file` and `purpose`. If direct routing has multiple providers with different credentials, use `X-Model-Name` to select the provider. Subsequent operations on a `file_id` must address the same provider. Content downloads pass through a file check before bytes are returned. Anthropic only permits downloading files created by code execution or skills; attempting to download a user-uploaded file returns a provider error.
 
-Transfer through base64 (for local files):
+Successfully uploading a file to the provider is not the same as successfully checking its contents in Monitoring. Filename blacklists and DataClean detection in extracted file contents are separate mechanisms. DataClean does not rewrite the original file contents.
+
+## 7. Responses, modes, and blocking
+
+Normal responses use the selected API format. Protection can modify the body: DataClean sanitizes text, pseudonymization and restoration replace values, and blocking substitutes the configured reply. Direct routing may also change the model alias and parameters according to configuration.
+
+- **`sync`**: Gateway waits for checks. A pre-model block prevents the provider call; a post-model block replaces the response. With `stream: true`, Gateway forces a non-streaming upstream request and returns JSON so it can check the complete response. Clients must account for this behavior.
+- **`async`**: with deferred ingest enabled, Monitoring returns HTTP 202 and an `accepted` receipt to Gateway. Checks run later and do not stop the model response. This does not mean the Gateway client receives HTTP 202 instead of the model response. SSE streaming is available when the selected route supports it.
+
+A policy block can be represented by a successful HTTP response containing replacement text. HTTP 200 alone does not prove there was no violation. Authorization, transport, and limit errors have separate HTTP statuses.
+
+Monitoring warnings may reach the client in the `X-HiveTrace-Warning` header, for example `session_history_full` when the session pseudonym dictionary is full. Handle warnings separately from the HTTP status.
+
+## 8. Errors and limits
+
+| Status | Example causes |
+|---|---|
+| 400 | Invalid body, missing multipart `request` JSON part, incompatible model route |
+| 401 | Missing/unknown HiveTrace key; an upstream credential error is also possible |
+| 403 | Model or directory source not allowed for the application |
+| 404 | Unknown direct-route model or provider resource |
+| 413 | Per-file or total multipart size limit exceeded |
+| 429 | Upstream rate limiting |
+| 502/503 | Transport failure, unavailable access-policy directory, or unconfigured direct routing |
+
+File errors must not be treated as successful checks: with file protection enabled, a missing or unsuccessfully checked expected attachment can block the message. Inspect Monitoring results and diagnostics.
+
+| Gateway setting | Default |
+|---|---|
+| `GATEWAY_UPSTREAM_TIMEOUT` | 120 seconds |
+| `HIVETRACE_TIMEOUT` | 60 seconds |
+| `HIVETRACE_SETTINGS_TIMEOUT` | 3 seconds |
+| `HIVETRACE_FILES_MAX_BYTES` | 20 MiB per file |
+| `HIVETRACE_FILES_MULTIPART_MAX_TOTAL_BYTES` | 32 MiB total multipart file size |
+| `HIVETRACE_FILES_TIMEOUT` | 15 seconds for attachment downloads |
+| `HIVETRACE_FILES_UPLOAD_TIMEOUT` | 20 seconds for upload to Monitoring |
+| `HIVETRACE_FILES_VERDICT_TIMEOUT` | 60 seconds to wait for the result with files |
+
+A message may contain up to 10 files. Deployment values may differ. Download plus upload time must fit within Monitoring's hard file-check deadline, which must be shorter than Gateway's verdict timeout. Proxy and provider limits also apply.
+
+## 9. Gateway configuration
+
+The administrator configures these required settings:
 
 ```bash
-B64=$(base64 -i ./test111.txt | tr -d '\n')
-curl -X POST http://gateway:4100/v1/chat/completions \
-  -H "Authorization: Bearer <upstream-key>" \
-  -H "X-HiveTrace-Api-Key: <gateway-key>" \
-  -H "Content-Type: application/json" \
-  -H "X-Application-Id: <APPLICATION_ID>" \
-  -H "X-User-Id: alice@company.com" \
-  -H "X-Attached-Files: [{\"name\":\"test111.txt\",\"content_base64\":\"$B64\",\"type\":\"text/plain\"}]" \
-  -d '{ "model": "gpt-5", "messages": [{"role":"user","content":"User message"}] }'
-```
-
-Transfer through URL (the gateway downloads the file over HTTP/HTTPS):
-
-```bash
-curl -X POST http://gateway:4100/v1/chat/completions \
-  -H "Authorization: Bearer <upstream-key>" \
-  -H "X-HiveTrace-Api-Key: <gateway-key>" \
-  -H "Content-Type: application/json" \
-  -H "X-Application-Id: <APPLICATION_ID>" \
-  -H "X-User-Id: alice@company.com" \
-  -H 'X-Attached-Files: [{"url":"https://files.company.example/contract.pdf","name":"contract.pdf","type":"application/pdf"}]' \
-  -d '{ "model": "gpt-5", "messages": [{"role":"user","content":"User message"}] }'
-```
-
-Descriptor format (`X-Attached-Files` is a JSON array; each item contains either `url` or `content_base64`):
-
-| Field            | Type   | Description                                                                                           |
-| ---------------- | ------ | ----------------------------------------------------------------------------------------------------- |
-| `url`            | string | HTTP/HTTPS URL of the file. `data:` URIs with inline base64 are also supported.                       |
-| `content_base64` | string | Base64-encoded file content. Alternative to `url`.                                                    |
-| `name`           | string | File name. Used when saving to HiveTrace; inferred from the URL if missing.                           |
-| `type`           | string | File MIME type. If missing, inferred from the extension or from the download response `Content-Type`. |
-
-Header alias: `X-AttachedFiles`.
-
-Behavior:
-
-- **LLM.** The request body is sent to the upstream unchanged; `X-Attached-Files` is not forwarded to the upstream. If there is no inline file data in `messages[].content`, the model does not receive the file.
-- **HiveTrace.** An audit copy of the file is additionally attached to the `user_prompt` record and linked to the request `analysis_id`.
-- **Client changes.** One additional header. The request body remains a standard OpenAI payload.
-
-Additional capabilities compared with strategy 1:
-
-- An audit copy of the file is saved in HiveTrace regardless of whether the file is passed to the model.
-- URL transfer is supported: the gateway downloads the file itself, so the client does not need to put the file content into the request payload.
-- The full file content reaches HiveTrace, not only the text part of the request.
-
-#### 5.3.3. Combined Scenario
-
-If you need both (a) to pass the file to the LLM and (b) to save its audit copy in HiveTrace, use both strategies in a single request. `messages[].content` delivers the file to the model, and `X-Attached-Files` provides the audit copy in HiveTrace.
-
-```bash
-B64=$(base64 -i ./contract.pdf | tr -d '\n')
-curl -X POST http://gateway:4100/v1/chat/completions \
-  -H "Authorization: Bearer <upstream-key>" \
-  -H "X-HiveTrace-Api-Key: <gateway-key>" \
-  -H "Content-Type: application/json" \
-  -H "X-Application-Id: <APPLICATION_ID>" \
-  -H "X-User-Id: alice@company.com" \
-  -H "X-Attached-Files: [{\"name\":\"contract.pdf\",\"content_base64\":\"$B64\",\"type\":\"application/pdf\"}]" \
-  -d "{
-    \"model\": \"gpt-5\",
-    \"messages\": [{
-      \"role\": \"user\",
-      \"content\": [
-        {\"type\": \"text\", \"text\": \"Summarize the document.\"},
-        {\"type\": \"file\", \"file\": {\"filename\": \"contract.pdf\", \"file_data\": \"data:application/pdf;base64,$B64\"}}
-      ]
-    }]
-  }"
-```
-
-In this case:
-
-1. `messages[].content` is passed to the upstream unchanged; the model receives the file through the standard OpenAI protocol.
-2. `X-Attached-Files` is processed by the gateway in parallel: the file is decoded and attached to `user_prompt` in HiveTrace.
-3. The model response is registered in HiveTrace through the standard post-call request.
-
-Use this for compliance scenarios where both model-side file processing and audit of the original content in HiveTrace are required.
-
-#### 5.3.4. Attachment Error Handling
-
-A failure to download or decode a file (HTTP `>=400`, timeout, size exceeding `HIVETRACE_FILES_MAX_BYTES`, base64 decoding error) does not cause a client-facing failure. The gateway isolates such failures:
-
-- The problematic file is not sent to HiveTrace. The gateway logs a warning with diagnostics (`Attachment download failed: url=… status=404`, and so on).
-- Other files in `X-Attached-Files` are processed independently.
-- The request body is passed to the upstream unchanged.
-- The client receives a normal model response with the HTTP status returned by the upstream.
-
-### Attachment Limits
-
-| Parameter                     | Default | ENV                               |
-| ----------------------------- | ------- | --------------------------------- |
-| Maximum size of one file      | 20 MiB  | `HIVETRACE_FILES_MAX_BYTES`       |
-| Parallel downloads            | 4       | `HIVETRACE_FILES_MAX_CONCURRENCY` |
-| Download timeout for one file | 60 s    | `HIVETRACE_FILES_TIMEOUT`         |
-
-A file that exceeds the limit is excluded from processing and a warning is written to the log; other attachments continue to be processed.
-
-### 5.4. Request Body Size Limits
-
-The gateway does not impose its own request body size limit. Size control is handled by the upstream.
-
----
-
-## 6. Response Format
-
-### 6.1. Successful Non-Streaming Response
-
-The response body and HTTP status **fully match the upstream response**. Content type: `application/json`. The structure matches the standard OpenAI format:
-
-```json
-{
-	"id": "chatcmpl-…",
-	"object": "chat.completion",
-	"created": 1234567890,
-	"model": "gpt-5",
-	"choices": [
-		{
-			"index": 0,
-			"message": { "role": "assistant", "content": "..." },
-			"finish_reason": "stop"
-		}
-	],
-	"usage": { "prompt_tokens": 23, "completion_tokens": 45, "total_tokens": 68 }
-}
-```
-
-### 6.2. Successful Streaming Response
-
-`Content-Type: text/event-stream`. The response body is a sequence of SSE frames:
-
-```
-data: {"id":"…","object":"chat.completion.chunk","choices":[{"delta":{"content":"Hel"}}]}
-
-data: {"id":"…","object":"chat.completion.chunk","choices":[{"delta":{"content":"lo!"},"finish_reason":"stop"}]}
-
-data: [DONE]
-
-```
-
-**Comment frames** may be sent between regular `data:` frames to keep the connection alive:
-
-```
-: keepalive
-
-```
-
-> A streaming response can be delivered to the user with monitoring enabled only in async mode.
-
-### 6.3. Response Replacement by HiveTrace Policy
-
-This is possible **only** when `app_mode=sync` is set in the per-app policy (Redis). If `mode=async` or the policy is not configured, the behavior described in this section is not applied to the request.
-
-#### 6.3.1. Pre-Call Block (HiveTrace Rejected Before the LLM Call)
-
-The request **was not sent** to the upstream. The gateway returns a synthesized `chat.completion` with a diagnostic `metadata.hivetrace` block:
-
-```json
-{
-	"id": "hivetrace-guardrails-<uuid>",
-	"object": "chat.completion",
-	"created": 1717171717,
-	"model": "<requested or 'unknown'>",
-	"choices": [
-		{
-			"index": 0,
-			"message": {
-				"role": "assistant",
-				"content": "<phrase from the application policy>"
-			},
-			"finish_reason": "stop"
-		}
-	],
-	"usage": { "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0 },
-	"metadata": {
-		"hivetrace": {
-			"response_replaced": true,
-			"response_replacement": {
-				"stage": "pre_call",
-				"type": "<guardrails|custom_policy|dataclean>",
-				"request_id": "<metadata.request_id from the request body or a generated UUID>"
-			},
-			"prepared_response": { "...": "verdict context from HiveTrace" }
-		}
-	}
-}
-```
-
-The client can detect replacement by checking for `metadata.hivetrace.response_replaced == true` or by the `id` prefix (`hivetrace-…`).
-
-#### 6.3.2. Streaming + Sync Mode
-
-In `sync` mode, the gateway **forcibly disables** `stream: true` by replacing it with `stream: false` before calling HiveTrace. The reason is that replacing an SSE response after transmission to the client has started is technically impossible. Therefore, in `sync` mode, the client always receives a non-streaming response, even if `body.stream` was set to `true`.
-
----
-
-## 7. Errors
-
-All errors returned to the client have the following shape:
-
-```json
-{"error": {"message": "...", "type": "...", "code": <int>}}
-```
-
-If the upstream already returns an OpenAI-formatted error (`{"error": {...}}`), the gateway passes it through **without an additional wrapper**, preserving the provider's original fields (`type`, `param`, `code`).
-
-The `type` field is used to distinguish error sources:
-
-- `invalid_request_error` - a client error rejected by the gateway or upstream.
-- `upstream_error` - the upstream returned `>=400`, and the response body did not match the OpenAI-compatible format.
-- `gateway_error` - the gateway could not successfully call the upstream. Always `code: 502`.
-- `rate_limit_error`, `authentication_error`, and others - native values from OpenAI-compatible upstreams, passed through unchanged.
-
-### 7.1. Complete Table
-
-| Status | Source                      | Condition                                                                                                                                     | Type in `error.type`                  |
-| ------ | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `400`  | gateway                     | Invalid JSON in the request body                                                                                                              | `invalid_request_error`               |
-| `400`  | upstream                    | Business validation (missing `messages`, exceeded context window, and so on)                                                                  | `invalid_request_error` (passthrough) |
-| `401`  | gateway                     | Missing or empty `X-HiveTrace-Api-Key` header                                                                                                 | `invalid_request_error`               |
-| `401`  | upstream                    | `Authorization: Bearer` rejected by the upstream                                                                                              | `invalid_request_error` (passthrough) |
-| `403`  | upstream                    | Authorization succeeded, but the action is forbidden (for example, organization without quota)                                                | passthrough                           |
-| `404`  | upstream                    | The specified `model` does not exist                                                                                                          | `invalid_request_error` (passthrough) |
-| `413`  | upstream / proxy            | Body is too large                                                                                                                             | `upstream_error`                      |
-| `422`  | upstream                    | Payload failed validation (strict-mode schema)                                                                                                | passthrough                           |
-| `429`  | upstream                    | Rate limit                                                                                                                                    | `rate_limit_error` (passthrough)      |
-| `500`  | upstream                    | Internal upstream error                                                                                                                       | `upstream_error`                      |
-| `502`  | gateway                     | Network error between the gateway and upstream (DNS, refused, TLS). Also `httpx.ReadTimeout` BEFORE the first byte on non-streaming requests. | `gateway_error`                       |
-| `503`  | upstream                    | Upstream unavailable (maintenance, overload)                                                                                                  | `upstream_error`                      |
-| `504`  | - _(SSE error frames only)_ | Mid-stream `httpx.TimeoutException`                                                                                                           | `upstream_error`                      |
-
----
-
-## 8. Timeouts and Limits
-
-### 8.1. Layer Timeouts
-
-| Layer                                                            | Parameter                          | Default | Controlled by |
-| ---------------------------------------------------------------- | ---------------------------------- | ------- | ------------- |
-| Gateway -> upstream (single HTTP call)                           | `GATEWAY_UPSTREAM_TIMEOUT`         | 120 s   | gateway       |
-| Gateway -> HiveTrace (`/process_request/`, `/process_response/`) | `HIVETRACE_TIMEOUT`                | 60 s    | gateway       |
-| Gateway -> attachment URL (download)                             | `HIVETRACE_FILES_TIMEOUT`          | 60 s    | gateway       |
-| Gateway -> client: SSE keepalive                                 | `GATEWAY_STREAM_HEARTBEAT_SECONDS` | 60 s    | gateway       |
-
----
-
-## 9. Configuration
-
-### 9.1. Minimum Environment Variables
-
-```bash
-# Upstream
-UPSTREAM_URL=http://litellm:4000
-
-# HiveTrace
 HIVETRACE_URL=https://hivetrace.example.com/api
-HIVETRACE_APPLICATION_ID=<default app uuid>
-
-# Redis (for per-app policies; optional if blocking is not required)
-REDIS_HOST=redis
-REDIS_PORT=6379
-REDIS_DB=0
-REDIS_USER=""
-REDIS_PASSWORD="admin"
-REDIS_SSL=False
+ACCESS_POLICY_PUBLIC_KEY_PEM="<public-key-for-verifying-the-directory>"
+HIVETRACE_SERVICE_KEY="<gateway-service-key-issued-by-the-administrator>"
 ```
 
-### 9.2. Behavior When HiveTrace Is Missing
+Gateway cannot start without them. The service key is for internal communication; it does not replace the client's application key.
 
-If `HIVETRACE_URL` is not set, the gateway forwards requests to the upstream without sending telemetry to HiveTrace. When the module is imported, a warning is written to stderr: `HiveTrace is effectively disabled`.
+Direct routing additionally requires `GATEWAY_MODEL_CONFIG` to point to a YAML file containing model routes and provider credential references. Use `model_list[].gateway_params` in that file; the Gateway registry rejects the LiteLLM field name `litellm_params`. For LiteLLM, configure `UPSTREAM_URL` and have clients supply a separate LiteLLM key.
 
-The `X-HiveTrace-Api-Key` contract is preserved: the key remains required for client requests, although it is effectively unused when there is no HiveTrace connection. This mode is intended for debugging and resilient handling of configuration errors; in deployments, `HIVETRACE_URL` must be set explicitly.
-
-### 9.3. Behavior When Redis Is Missing
-
-If Redis is not configured, per-app blocking policies are unavailable; pre-call and post-call telemetry is sent to HiveTrace in `async` mode by default.
+If Monitoring becomes unavailable, authorization may use the last verified directory within its allowed lifetime. When no usable copy is available, Gateway returns 503 without calling the model. A cached directory does not guarantee that current protection settings or check results are available; diagnose those failures separately. Before production use, verify Monitoring connectivity, application settings, and blocking, file, and streaming scenarios.

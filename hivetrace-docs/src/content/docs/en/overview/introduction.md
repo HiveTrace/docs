@@ -52,6 +52,7 @@ HiveTrace Monitoring can be integrated into existing infrastructure in several w
 - **SDK**: in-app integration for the deepest control, enabling checks directly in business logic, richer request/response context, and faster policy adaptation.
 - **Gateway**: proxy-style deployment to centrally control AI traffic with minimal code changes; all requests/responses pass through one control plane for consistent enforcement and visibility.
 - **API**: API-based integration for fast onboarding.
+- **Claude Code Hooks**: agent behavior interception and control at specific stages of its lifecycle, in particular before and after tool calls.
 
 ## Model Compatibility
 

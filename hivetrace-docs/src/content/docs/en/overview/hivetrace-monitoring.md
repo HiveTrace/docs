@@ -33,16 +33,16 @@ This approach helps prevent unsafe outcomes **before they affect business proces
 
 Use the icons in the left navigation to open the main workspace areas. The additional platform menu is in the lower-left corner: click the avatar containing the current user's initial.
 
-![Profile and platform menu](../../../../assets/img/platform-profile-menu-4-3.webp)
+![Profile and platform menu](../../../../assets/img/en/platform-profile-menu-4-4.webp)
 
 The menu header shows the current user's avatar and name. The following destinations appear below it:
 
 | Item | Destination |
 | --- | --- |
-| [**Application settings**](../guides/hivetrace-monitoring/platform-settings/) | Global monitoring and protection module settings |
-| [**Service status**](../guides/hivetrace-monitoring/service-status/) | Platform component health and service availability |
-| [**License and limits**](../guides/hivetrace-monitoring/license-limits/) | Active license information and available limits |
-| [**What's new?**](../guides/hivetrace-monitoring/whats-new/) | Changes and capabilities introduced in recent releases |
+| [**App Configuration**](../../guides/hivetrace-monitoring/app-configuration) | Global monitoring and protection module settings |
+| [**Service status**](../../guides/hivetrace-monitoring/service-status) | Platform component health and service availability |
+| [**License and limits**](../../guides/hivetrace-monitoring/license-limits/) | Active license information and available limits |
+| [**What's new?**](../../guides/hivetrace-monitoring/whats-new/) | Changes and capabilities introduced in recent releases |
 | **Documentation** | HiveTrace user documentation, opened in a separate tab |
 | **Sign out** | Ends the current session and returns to the sign-in page |
 

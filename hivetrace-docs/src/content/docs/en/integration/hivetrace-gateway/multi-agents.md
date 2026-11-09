@@ -1,171 +1,85 @@
 ---
-title: "Multi-agents"
+title: "Multi-agent applications"
 sidebar:
   order: 3
 ---
 
-## Purpose
+## Responsibilities
 
-This mode is used in applications implementing multi-agent architectures where models may:
+Route model calls through Gateway. Agent orchestration and tool execution remain in your application. Gateway checks model traffic; it does not execute local tools or automatically prevent a local tool call. Use a dedicated SDK/hook integration if tool-execution telemetry or enforcement is required.
 
-- plan multi-step reasoning,
-- invoke tools,
-- exchange context,
-- generate final responses.
+## Gateway 4.4 connection
 
----
+- Set the OpenAI client's `base_url` to the Gateway address including `/v1`.
+- Pass the **HiveTrace application API token** as `api_key`.
+- Supply `X-LiteLLM-Api-Key` separately for LiteLLM routing; omit it for configured direct routing.
+- Allow every model used by the agents for the application. The HiveTrace token determines the application.
+- Use the same `X-Session-Id` across related agent steps and a stable `X-User-Id` for the initiating user.
+- Configure `sync`/`async` in application settings, not a request header.
 
-## Architectural Principle
+## Agent steps and telemetry
 
-Responsibility separation:
+One user task may involve several model calls. Keep their conversation identifier consistent so they can be investigated together. Do not rely on the legacy `HIVETRACE_DEDUP_AGENT_TOOL_CALLS` setting: it is not part of the Gateway 4.4 configuration.
 
-- **LLM calls go through the Gateway**
-- **Tools execute locally in your application**
-- **HiveTrace analyzes only LLM requests and responses**
+`X-HiveTrace-Skip-System-Requests: false` disables skipping of requests identified as service requests. It does not guarantee that every system instruction is stored as a separate message. Check the records produced by the actual agent framework and avoid treating a tool result as a newly submitted user prompt.
 
-Gateway does not execute tools and does not orchestrate agents.
+## Python example
 
----
-
-## What Changes When Switching from OpenAI to Gateway
-
-### Endpoint
-
-Before:
+The example uses OpenAI Agents SDK with Chat Completions and a local tool returning demo data. Install the project's compatible `openai` and `openai-agents` packages. `MODEL_NAME` must be a configured, allowed model with tool support.
 
 ```python
-base_url="https://api.openai.com/v1"
-```
-
-With Gateway:
-
-```python
-base_url=$GATEWAY_URL  # e.g. http://host:4100/v1
-```
-
-Must point strictly to `/v1`.
-
----
-
-### API Key
-
-Before:
-
-```python
-api_key=$OPENAI_API_KEY
-```
-
-With Gateway:
-
-```python
-api_key=$LITELLM_MASTER_KEY
-```
-
----
-
-### Required Headers for HiveTrace
-
-```
-X-Application-Id: <HIVETRACE_APPLICATION_ID>
-X-User-Id: <USER_ID>
-X-Session-Id: <SESSION_ID>
-```
-
-Optional:
-
-```
-X-HiveTrace-Mode: sync | async
-X-HiveTrace-Skip-System-Requests: false
-```
-
-For multi-agent systems, typically:
-
-```
-X-HiveTrace-Skip-System-Requests: false
-```
-
-to preserve system instructions for audit.
-
----
-
-## Telemetry Behavior
-
-Agents may perform multiple LLM calls per user request:
-
-- planning
-- tool calls
-- continuation
-- final response
-
-Gateway configuration:
-
-```bash
-HIVETRACE_DEDUP_AGENT_TOOL_CALLS=true
-HIVETRACE_SKIP_SYSTEM_REQUESTS=false
-```
-
-Prevents duplicate user input records and preserves system context.
-
----
-
-## Tools
-
-Tools:
-
-- execute locally
-- are not proxied through Gateway
-- are invisible to HiveTrace except through LLM I/O
-
----
-
-## Minimal Example
-
-```python
+import asyncio
 import os
-import httpx
+from typing import Any
+
 from openai import AsyncOpenAI
-from agents import Agent, Runner, function_tool
+from agents import Agent, RunConfig, Runner, function_tool
 from agents.models.openai_chatcompletions import OpenAIChatCompletionsModel
 
-@function_tool
-def fetch_users_summary():
-    return {"total": 123}
 
-openai_client = AsyncOpenAI(
-    base_url=os.environ["GATEWAY_URL"],
-    api_key=os.environ["LITELLM_MASTER_KEY"],
-    default_headers={
-        "X-Application-Id": os.environ["HIVETRACE_APPLICATION_ID"],
+@function_tool
+def fetch_users_summary() -> dict[str, Any]:
+    """Return a demo user count; replace with an authorized application query."""
+    return {"total_count": 123}
+
+
+async def main() -> None:
+    headers = {
         "X-User-Id": os.environ["USER_ID"],
         "X-Session-Id": os.environ["SESSION_ID"],
-    },
-)
+        "X-HiveTrace-Skip-System-Requests": "false",
+    }
+    if os.getenv("LITELLM_API_KEY"):
+        headers["X-LiteLLM-Api-Key"] = os.environ["LITELLM_API_KEY"]
 
-model = OpenAIChatCompletionsModel(
-    model="gpt-4.1-mini",
-    openai_client=openai_client
-)
+    async with AsyncOpenAI(
+        base_url=os.environ["GATEWAY_URL"].rstrip("/"),
+        api_key=os.environ["HIVETRACE_API_KEY"],
+        default_headers=headers,
+    ) as client:
+        agent = Agent(
+            name="Demo assistant",
+            instructions="Call fetch_users_summary once, then answer briefly.",
+            tools=[fetch_users_summary],
+            model=OpenAIChatCompletionsModel(
+                model=os.environ["MODEL_NAME"], openai_client=client
+            ),
+        )
+        result = await Runner.run(
+            agent,
+            input="How many users do we have?",
+            max_turns=3,
+            run_config=RunConfig(tracing_disabled=True),
+        )
+        print(result.final_output)
 
-agent = Agent(
-    name="Assistant",
-    instructions="Call fetch_users_summary then respond.",
-    tools=[fetch_users_summary],
-    model=model,
-)
 
-result = await Runner.run(agent, input=[{"role": "user", "content": "How many users?"}])
-print(result.final_output)
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
----
+## Verification
 
-## Summary
+Check the model requests, responses, and session correlation in HiveTrace. Test an allowed message and a configured violation. In synchronous mode, account for replacement responses and forced non-streaming JSON; do not execute local tools solely because a model request returned HTTP 200. In asynchronous mode, analysis happens after acceptance and cannot prevent that model response.
 
-To enable multi-agents with Gateway:
-
-1. Change `base_url`
-2. Use `LITELLM_MASTER_KEY`
-3. Add HiveTrace headers
-4. Configure Gateway telemetry env variables
-
-Agent runtime and tool logic remain unchanged.
+See the [integration guide](../integration-guide/) for authentication, routing, files, and errors.

@@ -1,57 +1,311 @@
 ---
 title: "Users"
 sidebar:
-  order: 8
+  order: 9
 ---
 
 The **Users** section lists the end users of the selected AI application and provides access to their related sessions and files.
 
-To open it, go to **Applications**, click the ID of the required application, and select the **Users** tab.
+## Required permissions
 
-![Users of the selected application](../../../../../assets/img/users-application-table-4-3.webp)
+| Action | Area | Min. access level |
+|---|---|---|
+| Viewing application users | `Applications` | `Read` |
+| | `End users` | `Read` |
+| Creating application users | `Applications` | `Read` |
+| | `End users` | `Edit` |
+| Deleting application users | `Applications` | `Read` |
+| | `End users` | `Read` |
+| | `Granular permission` | `Delete end users` |
+| Viewing user sessions and files | `Applications` | `Read` |
+| | `End users` | `Read` |
+| | `Sessions and messages` | `Read` |
+| File preview and download | `Applications` | `Read` |
+| | `End users` | `Read` |
+| | `Granular permission` | `Download analysis files` |
+| Editing an application from the header | `Applications` | `Edit` |
+| Deleting an application from the header | `Applications` | `Full` |
 
-The application name and description are shown at the top. The **Users**, **Policies**, **Dataclean**, and **Alert configurations** tabs are displayed below the application details.
+If the user does not have access to view the page, `403 — Access denied` is displayed.
+
+## Opening the `Users` section
+
+1. In the sidebar, select **Applications**.
+2. Open the required application by clicking its card or its name, depending on the selected view.
+3. Hover over the **Users** tab.
+4. Click **User list**.
+
+![Navigating to the Users section](../../../../../assets/img/en/users-redirect-4-4.webp)
+
+The page header displays the application's name, ID, and description (if any). The copy button is available next to the ID. The header also contains the `Back to applications` link that leads to the `Applications` section.
+
+## Editing the application
+
+![Users - editing the application](../../../../../assets/img/en/users-edit-app-4-4.webp)
+
+1. Click `Edit`.
+2. Change the required fields.
+3. Click `Save`.
+
+## Deleting the application
+
+![Users - deleting the application](../../../../../assets/img/en/users-delete-app-4-4.webp)
+
+1. Click `Delete`.
+2. Confirm the deletion in the confirmation dialog.
+
+This action cannot be undone. Prior to deletion, please verify that integration traffic has been stopped or redirected and that the associated API tokens are no longer in use.
 
 ## Users table
 
 The table contains:
 
-- **Client ID** — the unique user identifier. A blue ID links to the user details page;
-- **Full name** — the user’s display name, if it was supplied or added manually.
+- **User** — the blue clickable link leads to the user page. It displays the full name if it was added manually, or the user's external ID otherwise. The user's external ID is displayed below the link. The copy button is available next to the ID.
+- **User groups** — group the user has been added to.
+- **Sessions** — number of sessions associated with this user. Clicking it navigates to the `Sessions` section.
+- **Files** — number of files the user has uploaded. Clicking it navigates to the `Files` section.
+
+![Users table](../../../../../assets/img/en/users-table-4-4.webp)
 
 Available actions:
 
-1. Click **Add new user** to create a user manually.
-2. Open **Column settings** to select the visible columns.
-3. Use the **⋮** menu in a user row for the available record actions, including editing and deletion.
-4. At the bottom of the table, change the number of rows per page or move between pages.
-5. Click a blue **Client ID** to open the user details page.
+1. Click `Add user` to create a user manually.
+2. Click **Filters** to filter users by full name, external ID, or group; the counter on the button shows the number of active filters. Clicking `Reset` clears the filters and closes the form.
+3. Open **Customize Columns** to choose the displayed columns.
+4. The row **⋮** menu is used to edit or delete a specific user.
+5. At the bottom of the table, select the number of rows per page or navigate to another page.
+6. Click the blue clickable link to navigate to the user's page.
 
 ## Automatic user creation
 
-A user is created automatically when a new identifier is supplied to HiveTrace:
+A user is automatically created in two cases:
 
-- in additional parameters when using the API or SDK;
-- in HTTP headers when using a proxy.
+- when a new external user ID is passed in a HiveTrace request — either in additional parameters (API or SDK) or in HTTP headers (when using a proxy). An automatically created record may contain only the **Client ID**. Add the full name through the interface if needed.
 
-An automatically created record may contain only the **Client ID**. Add the full name through the interface if needed.
+- during directory synchronization with an external source — if a new user identifier is passed in the request. If the `users.fio` field is specified, the user is created with this name, which is displayed in the application's user table.
 
-## User details and sessions
+## User Sessions
 
-Clicking a **Client ID** opens the user details page. The user name and client ID appear at the top, followed by the **Sessions** and **Files** tabs.
+Click the blue clickable link to navigate to the user's page. The page header displays the user's name (if available) and the client's external ID, with the `Sessions` and `Files` tabs below. The copy button is available next to the ID. The header also contains the `Back to applications` link that leads to the `Applications` section.
 
-![User details and sessions](../../../../../assets/img/user-details-sessions-4-3.webp)
+![User page and sessions](../../../../../assets/img/en/user-sessions-details-4-4.webp)
 
-The **Sessions** tab shows the records associated with the user. The table contains the record and session IDs, user, application, message, and any other enabled columns.
+### Search
 
-- Click a blue **record ID** to open the event details.
-- Use **Column settings** to change the table layout.
-- Select **Files** to view the user’s uploaded attachments.
+![User sessions - search filter](../../../../../assets/img/en/user-sessions-search-filter-4-4.webp)
+
+The search finds records by record ID, session ID, or message text. The exact match is required only for the record ID; for the other fields, a partial match is sufficient. The query must contain between 3 and 256 characters.
+
+### Quick filters
+
+![User sessions - quick filters](../../../../../assets/img/en/user-sessions-quick-filters-4-4.webp)
+
+- **Today** — records for the current day;
+- **Violations** — records with at least one violation;
+- **With attachments** — records containing files;
+- **Data cleansing · 7 days** — DataClean violations from the latest seven days.
+
+### Period
+
+![User sessions - period filter](../../../../../assets/img/en/user-sessions-period-filter-4-4.webp)
+
+Choose **Today**, **7 days**, **30 days**, **All time**, or a custom calendar range. Month arrows navigate the calendar. Select both boundaries and then **Apply**. Future dates are disabled.
+
+### Violation
+
+![User sessions - violation filter](../../../../../assets/img/en/user-sessions-violation-filter-4-4.webp)
+
+Options are **All**, **Any violation**, **No violations**, **Safety policy** (Guardrail), **Custom policy**, **Data cleansing**, and **Language mismatch**. The number on the right is the matching count for the current selection.
+
+### User session summary
+
+![User sessions - summary](../../../../../assets/img/en/user-sessions-summary-4-4.webp)
+
+The user activity summary block consists of 4 sections:
+
+`Sessions` — total number of the user's sessions;
+
+`Messages` — total number of the user's messages;
+
+`Violations` — total number of records with violations;
+
+`Files` — total number of uploaded files.
+
+### Token usage by day
+
+![Token usage by day](../../../../../assets/img/en/user-sessions-token-usage-4-4.webp)
+
+The section shows the dynamics of token usage by day as a chart:
+
+`Total tokens` — total number of tokens used;
+
+`Records without token usage` — total number of records for which token usage has not been recorded.
+
+Dates are displayed on the horizontal axis, and the number of tokens on the vertical axis. The chart displays points; hovering over a point shows the value for a specific day.
+
+> **Note:** chart values are updated when filters are applied.
+
+### Violations
+
+![User sessions - Violations](../../../../../assets/img/en/user-sessions-analytics-violations-4-4.webp)
+
+The section shows the number of records by violation type:
+
+`Custom Policy` — custom policy violations;
+
+`Guardrail Policy` — Guardrail violations;
+
+`Data Cleansing` — DataClean violations;
+
+`Blacklist` - blacklist violations for messages and files;;
+
+`Language mismatch` — language mismatch violations.
+
+### Blacklist
+
+![User sessions - Blacklist](../../../../../assets/img/en/user-sessions-analytics-blacklist-4-4.webp)
+
+The section shows blacklist violations — for messages and files:
+
+`Total` —  total number of records with blacklist violations;
+
+`Messages` — total number of blacklist violations found in messages;
+
+`Files` — total number of blacklist violations found in files.
+
+### Sensitive data
+
+![User sessions - Sensitive data](../../../../../assets/img/en/user-sessions-analytics-sensitive-data-4-4.webp)
+
+The section shows the 5 most common categories of sensitive data detected for the user and where exactly they were found — in messages or in files.
+
+For each category, the following is displayed:
+
+- name of the base or custom pattern that triggered the DataClean violation;
+
+- total amount of detected data.
+
+### User session table
+
+![User sessions table](../../../../../assets/img/en/user-sessions-table-4-4.webp)
+
+- **ID** — a link that opens the record details;
+- **Session** — client session ID;
+- **Message** — a shortened request or response; the full text is available in the record details;
+- **Agents · Tools** — number of related tool calls, `—` is displayed if none;
+- **Files** — number of files attached to the session, `—` is displayed if none;
+- **Violation** — violation or `—` is displayed if none;
+- **Direction** — `in` for a request and `out` for a response;
+- **Date** — local date and time of the event.
+
+Clicking a value in the `Session`, `Violation`, `Direction`, or `Date` cell adds a filter by that value.
+
+Available actions:
+
+1. Click a blue **record ID** to navigate to the session details page.
+2. Sort sessions by date — ascending or descending. By default, descending sorting is applied.
+3. Open **Customize Columns** to choose the displayed columns.
+4. Select **Files** to view the user’s uploaded attachments.
 
 ## User files
 
-The **Files** tab lists files associated with the user’s requests. For supported formats, you can open a preview or download the original file.
+### User file summary
 
-![User files](../../../../../assets/img/users_files.webp)
+![User file summary](../../../../../assets/img/en/user-files-summary-4-4.webp)
+
+The block consists of 2 sections:
+
+`Total files` — total number of files attached to the user's sessions;
+
+`Files with detections` — total number of files in which violations were found.
+
+### Check status
+
+![User files - check status](../../../../../assets/img/en/user-files-status-4-4.webp)
+
+The block shows the distribution of files by verification results:
+
+`Clean` — total number of files whose verification found no violations;
+
+`Not checked` — total number of files without a completed content-check result; this is not confirmation that a file is safe;
+
+`Check failed` — total number of files for which an error occurred during verification;
+
+`Blocked` — total number of files blocked based on verification results.
+
+### Processing states
+
+The **Check** column displays the result when it is available. Otherwise, it may display the processing state:
+
+| State | Meaning and next action |
+|---|---|
+| **Pending** | The file is waiting for processing. Wait and refresh the page. |
+| **Processing** | The file is being processed. Wait for the result. |
+| **Retrying** | The system is retrying processing. Wait; if the state persists, report the file and message IDs to an administrator. |
+| **Checked** | Processing has finished. Check the findings; this state alone does not mean **Clean**. |
+| **Failed** | Processing failed. Report the file and message IDs to an administrator. |
+| **Skipped** | Processing was skipped. Check whether file processing is enabled for this application; do not treat this as a successful check. |
+| **Unsupported** | The file format is not supported for this processing. Ask an administrator which format to use. |
+
+**Not checked**, **Check failed**, **Skipped**, and **Unsupported** do not mean **Clean**. The presence of a file in the table, its availability for download, and its check result are separate properties.
+
+### Detections
+
+![User files - detections](../../../../../assets/img/en/user-files-detections-4-4.webp)
+
+The block shows which types of detections were found in files:
+
+`Personal data` — total number of files containing personal data;
+
+`Suspicious images` — total number of files with images that the system considered suspicious;
+
+`Other detections` — total number of files with detections that did not fall into the listed categories.
+
+### Search by file name
+
+![Search by file name](../../../../../assets/img/en/user-files-search-filter-4-4.webp)
+
+The search finds files by name — a partial match is sufficient.
+
+### Extension
+
+![Extension filter](../../../../../assets/img/en/user-files-extension-filter-4-4.webp)
+
+The list shows the available file extensions. **All** removes the extension restriction; selecting an extension updates the table.
+
+### Check
+
+![File check filter](../../../../../assets/img/en/user-files-check-filter-4-4.webp)
+
+The list shows the available file verification statuses. **All** removes the verification status restriction; selecting a specific item updates the table.
+
+### User file table
+
+The table displays files uploaded to the user's sessions. For supported formats, you can open a preview or download the original file.
+
+![User file table](../../../../../assets/img/en/user-files-table-4-4.webp)
+
+- **File** — file name with its extension; clicking it opens the file preview;
+- **Type** — file extension;
+- **Size** — file size;
+- **Direction** — `in` for the request and `out` for the response;
+- **Message** — session ID the file is attached to; clicking it navigates to the session details page;
+- **Check** — file verification status;
+- **Created at** — date and time of the event.
+
+Available actions:
+
+1. Click `Download selected` to download the files checked in the table. The button is disabled until at least one file is selected.
+2. Click `Download all` to download a ZIP archive of the available files on the **current table page**, with the current filters. Files on other pages are not included.
+3. Open **Customize Columns** to choose the displayed columns.
+4. Click the **⋮** button in a table row to download the selected file.
+5. Click the file name to open the file preview.
 
 > **Important:** file content processing depends on the global **Custom file processing** setting and the selected application configuration. If processing is disabled, a file appearing on this tab does not by itself mean that its contents were checked by policies or Dataclean.
+
+
+### Why a file cannot be downloaded
+
+Preview, selection, and download are available only when the file contents are stored and you have permission to download analysis files. If contents are unavailable, a file-unavailable icon appears beside the name; preview, selection, and download for that row are disabled. The record and its analysis results can still remain in the table.
+
+If you have no download permission, the download controls are hidden. Ask an administrator for the required access. **Download selected** is disabled when no available files are selected; **Download all** is disabled when the current page has no available files. Check the current page and filters before downloading an archive.

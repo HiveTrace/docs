@@ -1,14 +1,22 @@
 ---
 title: "Service status"
 sidebar:
-  order: 12
+  order: 21
 ---
 
 The **Service status** page shows overall platform availability, individual components, and their dependencies. Administrators open it from the profile menu and use it for initial diagnosis.
 
-![Platform summary and first service cards](../../../../../assets/img/service-status-summary-4-3.webp)
+## Required permissions
+
+To view service statuses, the following permissions are required:
+
+- Area **Platform** — access level of at least `Read`.
+
+If the user does not have access to view the page, `403 — Access denied` is displayed.
 
 ## Platform summary
+
+![Platform summary and first service cards](../../../../../assets/img/en/service-status-summary-4-4.webp)
 
 The top card contains the overall state and update time. The overall state takes component health into account: the platform can be reported as unavailable when a required service is down even if other components remain operational.
 
@@ -25,7 +33,7 @@ Each card contains:
 - error text when a check fails;
 - **Dependencies** — nested components and their individual states.
 
-![Operational services and dependencies](../../../../../assets/img/service-status-dependencies-4-3.webp)
+![Operational services and dependencies](../../../../../assets/img/en/service-status-dependencies-4-4.webp)
 
 A dependency appears inside its parent service card with its own name, type, latency, and state. This helps distinguish a failure in the service itself from a problem in a downstream model or component.
 
@@ -37,7 +45,7 @@ A dependency appears inside its parent service card with its own name, type, lat
 - **Disabled** — the component is disabled by configuration and is not treated as an incident;
 - **Unknown** — monitoring has not obtained a definitive result yet.
 
-![Unavailable service, error, and unknown dependencies](../../../../../assets/img/service-status-error-4-3.webp)
+![Unavailable service, error, and unknown dependencies](../../../../../assets/img/en/service-status-error-4-4.webp)
 
 For example, `HTTP 503` means the checked service could not process the request at that time. **Unknown** does not prove that a dependency failed; it means monitoring could not obtain a conclusive result.
 

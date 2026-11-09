@@ -4,181 +4,73 @@ sidebar:
   order: 2
 ---
 
-## Назначение
+Используйте Gateway для чат-приложения, которое обращается к модели через OpenAI-совместимый клиент. Пример использует контракт авторизации **Gateway 4.4**.
 
-Режим предназначен для классических LLM-приложений, где:
+## Подготовка
 
-- приложение отправляет `messages`,
-- модель генерирует ответ,
-- не используется агентная orchestration-логика,
-- отсутствуют tool calls.
+- `GATEWAY_URL` — адрес Gateway с `/v1`.
+- `HIVETRACE_API_KEY` — API-токен выбранного приложения HiveTrace.
+- `MODEL_NAME` — настроенный алиас модели, разрешённый этому приложению.
+- `LITELLM_API_KEY` — необязательный ключ для маршрута через LiteLLM. Для прямого маршрута, настроенного администратором Gateway, не задавайте его.
+- `USER_ID` и `SESSION_ID` — внешние идентификаторы пользователя и диалога для аналитики. Сохраняйте один ID сессии на протяжении диалога.
 
-Gateway работает как прозрачный прокси с мониторингом.
+Создайте приложение, настройте защиту и режим `sync`/`async`, разрешите модель и выпустите API-токен. Пустой список разрешённых моделей запрещает все вызовы. Приложение определяется токеном; заголовок с ID приложения не требуется.
 
----
-
-## Когда использовать
-
-Рекомендуется, если:
-
-- требуется централизованный контроль input/output,
-- применяются политики безопасности,
-- необходим аудит,
-- реализован стандартный чат.
-
----
-
-## Предварительные требования
-
-Необходимые параметры:
-
-- **GATEWAY_URL** — base URL уровня `/v1`
-- **LITELLM_MASTER_KEY** — ключ Gateway
-- **HIVETRACE_APPLICATION_ID** — UUID приложения
-- **USER_ID** — идентификатор пользователя
-- **SESSION_ID** — идентификатор сессии
-
-Важно: указывать `/v1`, а не полный endpoint.
-
----
-
-## Обязательные заголовки
-
-- `Authorization: Bearer <LITELLM_MASTER_KEY>`
-- `X-Application-Id`
-- `X-User-Id` или `X-OpenWebUI-User-Id`
-- `X-Session-Id` или `X-OpenWebUI-Chat-Id`
-
----
-
-## Пример (Python)
+## Пример Python
 
 ```python
 import os
 from openai import OpenAI
 
-client = OpenAI(
+headers = {
+    "X-User-Id": os.environ["USER_ID"],
+    "X-Session-Id": os.environ["SESSION_ID"],
+}
+if os.getenv("LITELLM_API_KEY"):
+    headers["X-LiteLLM-Api-Key"] = os.environ["LITELLM_API_KEY"]
+
+with OpenAI(
     base_url=os.environ["GATEWAY_URL"].rstrip("/"),
-    api_key=os.environ["LITELLM_MASTER_KEY"],
-    default_headers={
-        "X-Application-Id": os.environ["HIVETRACE_APPLICATION_ID"],
-        "X-User-Id": os.environ["USER_ID"],
-        "X-Session-Id": os.environ["SESSION_ID"],
-    },
-)
-
-response = client.chat.completions.create(
-    model="gpt-4.1-mini",
-    messages=[{"role": "user", "content": "Кратко объясни HiveTrace."}],
-)
-
-print(response.choices[0].message.content)
+    api_key=os.environ["HIVETRACE_API_KEY"],
+    default_headers=headers,
+) as client:
+    response = client.chat.completions.create(
+        model=os.environ["MODEL_NAME"],
+        messages=[{"role": "user", "content": "Briefly explain HiveTrace."}],
+    )
+    print(response.choices[0].message.content)
 ```
 
----
+## Пример curl
 
-## Пример (curl)
+В примере используется условный алиас `chat-model`; замените его на настроенную модель. Для прямого маршрута уберите строку `X-LiteLLM-Api-Key`.
 
 ```bash
-curl -X POST "$GATEWAY_URL/chat/completions" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $LITELLM_MASTER_KEY" \
-  -H "X-Application-Id: $HIVETRACE_APPLICATION_ID" \
+curl -sS "$GATEWAY_URL/chat/completions" \
+  -H "Authorization: Bearer $HIVETRACE_API_KEY" \
+  -H "X-LiteLLM-Api-Key: $LITELLM_API_KEY" \
   -H "X-User-Id: $USER_ID" \
   -H "X-Session-Id: $SESSION_ID" \
-  -d '{
-    "model": "gpt-4.1-mini",
-    "messages": [{"role":"user","content":"Hello from my app"}]
-  }'
+  -H "Content-Type: application/json" \
+  -d '{"model":"chat-model","messages":[{"role":"user","content":"Hello from my app"}]}'
 ```
 
----
+## Передача файла
 
-## Работа с файлами
-
-Если к сообщению необходимо прикрепить файл, то требуется указать следующий заголовок:
-
-- `-H "X-Attached-Files: <JSON-FILE>"`
-
-JSON должен включать в себя поля:
-
-- "name"
-- "content_base64"
-- "type"
-
-А так же добавить в тело запроса параметр `request_id` (**uuid v4**) для однозначного определения принадлежности файла к конкретному сообщению.
-
-### Пример (python)
-
-```python
-import base64
-import uuid
-import json
-import os
-from openai import OpenAI
-
-file_path = "image.png"
-with open(file_path, "rb") as f:
-    content_b64 = base64.standard_b64encode(f.read()).decode("ascii")
-
-request_id = str(uuid.uuid4())
-
-attached = [
-    {
-        "name": os.path.basename(file_path),
-        "content_base64": content_b64,
-        "type": "image/png",
-    }
-]
-attached_json = json.dumps(attached)
-
-client = OpenAI(
-    base_url=os.environ["GATEWAY_URL"].rstrip("/"),
-    api_key=os.environ["LITELLM_MASTER_KEY"],
-    default_headers={
-        "X-Application-Id": os.environ["HIVETRACE_APPLICATION_ID"],
-        "X-User-Id": os.environ["USER_ID"],
-        "X-Session-Id": os.environ["SESSION_ID"],
-        "X-Attached-Files": attached_json,
-    },
-)
-
-response = client.chat.completions.create(
-    model="gpt-4.1-mini",
-    messages=[{"role": "user", "content": "Проанализируй картинку"}],
-    metadata={"request_id": request_id}
-)
-
-print(response.choices[0].message.content)
-```
-
-### Пример (curl)
+Chat Completions и Responses принимают multipart-запрос с JSON-частью `request` и повторяемыми частями `attached_files`. Gateway добавляет файлы в запрос модели и извлекает копию для аудита. Провайдер и модель должны поддерживать выбранный формат файла.
 
 ```bash
-REQ_ID="$(uuidgen | tr '[:upper:]' '[:lower:]')"
-
-export ATTACHED_JSON=$(jq -c -n \
-  --arg name "image.png" \
-  --arg b64 "$(base64 -w0 ./image.png)" \
-  --arg type "image/png" \
-  '[{name: $name, content_base64: $b64, type: $type}]')
-
-curl -X POST "$GATEWAY_URL/chat/completions" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $LITELLM_MASTER_KEY" \
-  -H "X-Application-Id: $HIVETRACE_APPLICATION_ID" \
+curl -sS "$GATEWAY_URL/chat/completions" \
+  -H "Authorization: Bearer $HIVETRACE_API_KEY" \
+  -H "X-LiteLLM-Api-Key: $LITELLM_API_KEY" \
   -H "X-User-Id: $USER_ID" \
   -H "X-Session-Id: $SESSION_ID" \
-  -H "X-Attached-Files: $ATTACHED_JSON" \
-  -d "{
-    \"model\": \"gpt-4.1-mini\",
-    \"metadata\": {\"request_id\": \"$REQ_ID\"},
-    \"messages\": [{\"role\":\"user\",\"content\":\"Проанализируй картинку\"}]
-  }"
+  -F 'request={"model":"chat-model","messages":[{"role":"user","content":"Summarize the document."}]};type=application/json' \
+  -F 'attached_files=@contract.pdf;type=application/pdf'
 ```
 
----
+Также поддерживаются стандартные файловые части JSON. Для документов, предназначенных только для аудита, используйте `metadata.files`; этот канал не передаёт документ модели. Форматы файлов, Files API и лимиты описаны в [руководстве по интеграции](../integration-guide/).
 
-## Результат
+## Проверка результата
 
-Поведение для приложения идентично OpenAI API, с добавленным мониторингом и применением политик.
+Найдите сообщения в аналитике сессий по приложению, пользователю и сессии. В режиме `sync` защита может заблокировать запрос или заменить ответ. В режиме `async` отложенные проверки не блокируют ответ модели. HTTP 200 сам по себе не означает отсутствия нарушений. При запросе `stream: true` для синхронного приложения Gateway возвращает проверенный непотоковый JSON-ответ; учитывайте это в клиенте.
